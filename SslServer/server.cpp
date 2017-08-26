@@ -1,8 +1,8 @@
 /*
 
 Connect to server:
-telnet-ssl -z ssl  qflash.pl 4433
-openssl s_client -connect qflash.pl:4433
+telnet-ssl -z ssl  127.0.0.1 3333
+openssl s_client -connect 127.0.0.1:3333
 
 Update sources and install first 
 apt-get update
