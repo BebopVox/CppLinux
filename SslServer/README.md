@@ -13,7 +13,7 @@ apt-get install openssl libssl-dev
 apt-get install libmysql++ libmysql++-dev libmysql++-doc
 
 <br> Compile with: <br>
-g++ -o server server.cpp -lssl -lcrypto 
+g++ -o server serverSsl.cpp -lssl -lcrypto 
 
 <br> Connect:<br>
 openssl s_client -connect 127.0.0.1:3333 <br>
