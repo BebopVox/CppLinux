@@ -69,6 +69,24 @@ void saveJson(QJsonDocument document, QString fileName) {
     jsonFile.write(document.toJson());
 }
 
+// Read from resources file
+QString Read(QString Filename){
+    // Using
+    // Read from resources file
+    // Read(":/Files/json.json");
+
+    QFile mfile(Filename);
+    if(!mfile.open(QFile::ReadOnly | QFile::Text)){
+        qDebug() << "Could not open the file.";
+        return "";
+    }
+    QTextStream in(&mfile);
+    QString mText = in.readAll();
+    qDebug() << mText;
+    mfile.close();
+    return mText;
+}
+
 
 int main(int argc, char *argv[])
 {
