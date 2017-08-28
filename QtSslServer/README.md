@@ -9,6 +9,14 @@
 # Install openssl on linux
 <br> apt-get install openssl libssl-dev 
 
+# On debian when using QSSLSocket you need install openssl 1.0 
+apt install libssl1.0-dev libyaml-dev libarchive-dev libssl-dev
+<br> https://stackoverflow.com/questions/42094214/why-is-qsslsocket-working-with-qt-5-3-but-not-qt-5-7-on-debian-stretch
+<br>https://doc.qt.io/QtApplicationManager/installation.html#multi-vs-single-process
+<br>qDebug()<<"SSL version use for build: "<<QSslSocket::sslLibraryBuildVersionString();
+<br>qDebug()<<"SSL version use for run-time: "<<QSslSocket::sslLibraryVersionNumber();
+<br>qDebug()<<QCoreApplication::libraryPaths();
+
 # Connect to server
 openssl s_client -connect 127.0.0.1:3333
 <br>telnet-ssl -z ssl 127.0.0.1 3333
