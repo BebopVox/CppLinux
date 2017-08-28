@@ -27,6 +27,13 @@ void Json(QString json){
         qDebug() << propertyNames;
         qDebug() << propertyKeys;
     }
+
+    // Json object to string
+    qDebug() << "Json object to string";
+    QJsonDocument doc(jsonObject);
+    QString strJson(doc.toJson(QJsonDocument::Compact));
+
+    qDebug() << strJson;
 }
 
 int main(int argc, char *argv[])
@@ -38,3 +45,4 @@ int main(int argc, char *argv[])
 
     return a.exec();
 }
+
