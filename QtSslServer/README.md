@@ -1,11 +1,13 @@
 ## Qt C++ Linux
-<br>
-# Add library to .pro file
-LIBS += -lssl -lcrypto
 
 <br>
+
+# Add library to .pro file
+<br>LIBS += -lssl -lcrypto
+
+
 # Install openssl on linux
-apt-get install openssl libssl-dev 
+<br> apt-get install openssl libssl-dev 
 
 # Connect to server
 openssl s_client -connect 127.0.0.1:3333
