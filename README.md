@@ -2,10 +2,6 @@
 C++ linux
 
 <br>
-# Add library to .pro file
-LIBS += -lssl -lcrypto
-
-<br>
 # Install openssl on linux
 apt-get install openssl libssl-dev 
 
