@@ -7,7 +7,12 @@
 #include <QString>
 #include <QDebug>
 
-QString json2 = QStringLiteral("{\"success\":true,\"properties\":[{\"ID\": 1001,\"PropertyName\":\"McDonalds\",\"key\":\"00112233445566778899aabbccddeeff\"},{\"ID\":1002,\"PropertyName\":\"Burger King\",\"key\":\"10112233445566778899aabbccddeeff\"},{\"ID\":1003,\"PropertyName\":\"Taco Bell\",\"key\":\"20112233445566778899aabbccddeeff\"}]}");
+// from file
+#include <QByteArray>
+#include <QFile>
+
+
+QString json2 = QStringLiteral("{\"success\":\"true\",\"properties\":[{\"ID\": 1001,\"PropertyName\":\"McDonalds\",\"key\":\"00112233445566778899aabbccddeeff\"},{\"ID\":1002,\"PropertyName\":\"Burger King\",\"key\":\"10112233445566778899aabbccddeeff\"},{\"ID\":1003,\"PropertyName\":\"Taco Bell\",\"key\":\"20112233445566778899aabbccddeeff\"}]}");
 
 void Json(QString json){
 
@@ -30,10 +35,24 @@ void Json(QString json){
 
     // Json object to string
     qDebug() << "Json object to string";
+
     QJsonDocument doc(jsonObject);
     QString strJson(doc.toJson(QJsonDocument::Compact));
 
-    qDebug() << strJson;
+    qDebug() << qPrintable(strJson);
+}
+
+// Load json from file to Jsonobject
+QJsonObject JsonFile(QString path){
+    // Read JSON file
+    QFile file(path);
+    // file.open(QIODevice::ReadOnly);
+    QByteArray rawData = file.readAll();
+    // Parse document
+    QJsonDocument doc(QJsonDocument::fromJson(rawData));
+    // Get JSON object
+    QJsonObject json = doc.object();
+    return json;
 }
 
 int main(int argc, char *argv[])
