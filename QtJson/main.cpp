@@ -55,6 +55,21 @@ QJsonObject JsonFile(QString path){
     return json;
 }
 
+// Load json from file
+QJsonDocument loadJson(QString fileName) {
+    QFile jsonFile(fileName);
+    jsonFile.open(QFile::ReadOnly);
+    return QJsonDocument().fromJson(jsonFile.readAll());
+}
+
+// Save json to file
+void saveJson(QJsonDocument document, QString fileName) {
+    QFile jsonFile(fileName);
+    jsonFile.open(QFile::WriteOnly);
+    jsonFile.write(document.toJson());
+}
+
+
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
