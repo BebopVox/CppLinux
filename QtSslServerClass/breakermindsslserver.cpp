@@ -261,9 +261,11 @@ void BreakermindSslServer::ServerLoop(SSL *ssl){
         // std::cout << "Compare " << std::string(buffer) << " z " << std::string(dot) << " end ";
 
         if( std::string(endstr) == std::string(buf) ){
+            z = 0;
             printf("%s\n", "Close connection with client ");
             SSL_shutdown(ssl);
-            z = 0;
+            // kill chld proccess
+            kill(getpid(), SIGKILL);            
         }else{
             printf("%s\n", "Working connection");
         }
