@@ -187,71 +187,18 @@ void BreakermindSslServer::Start(int Port, string Certificate, string Certificat
         // ShowCerts(ssl);
         if (SSL_accept(ssl) <= 0) {
             ERR_print_errors_fp(stderr);
-        }
-        else {
+        } else {
             SSL_write(ssl, reply, strlen(reply));
         }
 
-        // buffer
-        const int readSize = 8192;
-        char buffer[8192];
-
-        int received, count = 0;
-        int TotalReceived = 0;
-
-        // Read from client
-        received = SSL_read (ssl, buffer, readSize);
-        if (received > 0)
-        {
-            TotalReceived += received;
-            printf("PID %i Buffsize - %i - %.*s \n", getpid(), received, received, buffer);
-        }
-
-        int z = 1;
-        while(z == 1){
-            // Send to client
-            SSL_write(ssl, reply1, strlen(reply1));
-
-            // Read from client
-            received = SSL_read (ssl, buffer, readSize);
-            if (received > 0)
-            {
-                TotalReceived += received;
-                printf("PID %i Buffsize - %i - %.*s \n", getpid(), received, received, buffer);
-            }
-            // buffer to string
-            printf("Client send: %s\n", buffer);
-
-            char endstr[] = "...";
-            std::string buf = std::string(buffer);
-            std::string dot = std::string(endstr);
-            // buf.substr(0, buf.size()-1);
-            buf = buf.substr(0, 3);
-            dot = dot.substr(0, 3);
-
-            std::cout << "Compare " << buf.size() << " z " << dot.size() << " end ";
-            std::cout << "Compare " << std::string(buffer) << " z " << std::string(dot) << " end ";
-
-            if( std::string(endstr) == std::string(buf) ){
-                printf("%s\n", "End connection ");
-                z = 0;
-                SSL_shutdown(ssl);
-            }else{
-                printf("%s\n", "Working connection");
-            }
-        }
-
-
-        // execl(kill( pid, 1 ));
-
+       ServerLoop();
 
 
         printf("SSL pid %s", getpid());
         SSL_free(ssl);
-        printf("Client pid %s", getpid());
         close(client);
-        printf("Kill pid %s", getpid());
         // kill process
+        // execl(kill( pid, 1 ));
         // kill(getpid(), SIGKILL);
         // kill(getpid(), SIGTERM);
 
@@ -266,4 +213,56 @@ void BreakermindSslServer::Start(int Port, string Certificate, string Certificat
     close(sock);
     SSL_CTX_free(ctx);
     cleanup_openssl();
+}
+
+// Server mail loop if You need send data with ovveride this method !!!
+void BreakermindSslServer::ServereLoop(SSL *ssl){
+    // buffer
+    const int readSize = 8192;
+    char buffer[8192];
+
+    int received, count = 0;
+    int TotalReceived = 0;
+
+    // Read from client
+    received = SSL_read (ssl, buffer, readSize);
+    if (received > 0)
+    {
+        TotalReceived += received;
+        printf("PID %i Buffsize - %i - %.*s \n", getpid(), received, received, buffer);
+    }
+
+    int z = 1;
+    while(z == 1){
+        // Send to client
+        SSL_write(ssl, reply1, strlen(reply1));
+
+        // Read from client
+        received = SSL_read (ssl, buffer, readSize);
+        if (received > 0)
+        {
+            TotalReceived += received;
+            printf("PID %i Buffsize - %i - %.*s \n", getpid(), received, received, buffer);
+        }
+        // buffer to string
+        printf("Client send: %s\n", buffer);
+
+        char endstr[] = "...";
+        std::string buf = std::string(buffer);
+        std::string dot = std::string(endstr);
+        // buf.substr(0, buf.size()-1);
+        buf = buf.substr(0, 3);
+        dot = dot.substr(0, 3);
+
+        // std::cout << "Compare " << buf.size() << " z " << dot.size() << " end ";
+        // std::cout << "Compare " << std::string(buffer) << " z " << std::string(dot) << " end ";
+
+        if( std::string(endstr) == std::string(buf) ){
+            printf("%s\n", "Close connection with client ");
+            SSL_shutdown(ssl);
+            z = 0;
+        }else{
+            printf("%s\n", "Working connection");
+        }
+    }
 }
