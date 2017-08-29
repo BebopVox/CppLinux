@@ -6,7 +6,7 @@
  *  LIBS += -lssl -lcrypto
  *
  * Set linux max proccess limit (1 per MB) 2GB
- * ulimit -u 2044
+ * ulimit -u 2048
  *
  * Show limits
  * ulimit -a
