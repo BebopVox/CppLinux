@@ -25,7 +25,7 @@ class BreakermindSslServer{
 
     protected:
         // Main loop send and receive data from clients here
-        void ServereLoop(SSL *ssl);
+        void ServerLoop(SSL *ssl);
 
     private:
         SSL* ssl;
