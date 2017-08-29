@@ -1,6 +1,5 @@
 #include "breakermindsslserver.h"
 
-
 #include <iostream>
 // file
 #include <fstream>
@@ -25,7 +24,7 @@ using namespace std;
 
 BreakermindSslServer::BreakermindSslServer()
 {
-    cout << "Run server with Start(PortNumber) Files: certificate.pem, privatekey.pem " << endl;
+    cout << "Run server with Start(PortNumber) Files: certificate.crt, private.key " << endl;
 }
 
 int BreakermindSslServer::create_socket(int port)
@@ -160,9 +159,8 @@ void BreakermindSslServer::Start(int Port, string Certificate, string Certificat
         uint len = sizeof(addr);
 
         const char reply[] = "220 Hello from server\n";
-        const char reply1[] = "250 Next Command MAIL FROM:\n";
 
-        cout << "Waiting for connections on port " << Port << endl;
+        cout << "Waiting for connections ..." << endl;
 
         int client = accept(sock, (struct sockaddr*)&addr, &len);
         printf("Connection: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
@@ -188,17 +186,51 @@ void BreakermindSslServer::Start(int Port, string Certificate, string Certificat
         // ShowCerts(ssl);
         if (SSL_accept(ssl) <= 0) {
             ERR_print_errors_fp(stderr);
-        }
-        else {
+        } else {
             SSL_write(ssl, reply, strlen(reply));
         }
 
-        // buffer
-        const int readSize = 8192;
-        char buffer[8192];
+        // Server loop send and receive data from clients
+        ServerLoop(ssl);
 
-        int received, count = 0;
-        int TotalReceived = 0;
+
+        printf("SSL pid %s", getpid());
+        SSL_free(ssl);
+        close(client);
+        // kill process
+        // execl(kill( pid, 1 ));
+        // kill(getpid(), SIGKILL);
+        // kill(getpid(), SIGTERM);
+    }
+
+    close(sock);
+    SSL_CTX_free(ctx);
+    cleanup_openssl();
+}
+
+// Server mail loop if You need send data with ovveride this method !!!
+void BreakermindSslServer::ServerLoop(SSL *ssl){
+    // buffer
+    const int readSize = 8192;
+    char buffer[8192];
+
+    int received, count = 0;
+    int TotalReceived = 0;
+
+    // Read from client
+    received = SSL_read (ssl, buffer, readSize);
+    if (received > 0)
+    {
+        TotalReceived += received;
+        printf("PID %i Buffsize - %i - %.*s \n", getpid(), received, received, buffer);
+    }
+
+    int z = 1;
+    while(z == 1){
+
+        const char reply1[] = "250 Next Command MAIL FROM:\n";
+        // Send to client
+        SSL_write(ssl, reply1, strlen(reply1));
 
         // Read from client
         received = SSL_read (ssl, buffer, readSize);
@@ -207,51 +239,25 @@ void BreakermindSslServer::Start(int Port, string Certificate, string Certificat
             TotalReceived += received;
             printf("PID %i Buffsize - %i - %.*s \n", getpid(), received, received, buffer);
         }
+        // buffer to string
+        printf("Client send: %s\n", buffer);
 
-        int z = 1;
-        while(z == 1){
-            // Send to client
-            SSL_write(ssl, reply1, strlen(reply1));
+        char endstr[] = "...";
+        std::string buf = std::string(buffer);
+        std::string dot = std::string(endstr);
+        // buf.substr(0, buf.size()-1);
+        buf = buf.substr(0, 3);
+        dot = dot.substr(0, 3);
 
-            // Read from client
-            received = SSL_read (ssl, buffer, readSize);
-            if (received > 0)
-            {
-                TotalReceived += received;
-                printf("PID %i Buffsize - %i - %.*s \n", getpid(), received, received, buffer);
-            }
-            // buffer to string
-            printf("Client send: %s\n", buffer);
+        // std::cout << "Compare " << buf.size() << " z " << dot.size() << " end ";
+        // std::cout << "Compare " << std::string(buffer) << " z " << std::string(dot) << " end ";
 
-            char endstr[] = "...";
-            std::string buf = std::string(buffer);
-            std::string dot = std::string(endstr);
-            // buf.substr(0, buf.size()-1);
-            buf = buf.substr(0, 3);
-            dot = dot.substr(0, 3);
-
-            std::cout << "Compare " << buf.size() << " z " << dot.size() << " end ";
-            std::cout << "Compare " << std::string(buffer) << " z " << std::string(dot) << " end ";
-
-            if( std::string(endstr) == std::string(buf) ){
-                printf("%s\n", "End connection ");
-                z = 0;
-                SSL_shutdown(ssl);
-            }else{
-                printf("%s\n", "Working connection");
-            }
+        if( std::string(endstr) == std::string(buf) ){
+            printf("%s\n", "Close connection with client ");
+            SSL_shutdown(ssl);
+            z = 0;
+        }else{
+            printf("%s\n", "Working connection");
         }
-
-
-        printf("SSL pid %s", getpid());
-        SSL_free(ssl);
-        close(client);
-        // kill(getpid(), SIGKILL);
-        // kill(getpid(), SIGTERM);
-        // execl(kill( pid, 1 ));
     }
-
-    close(sock);
-    SSL_CTX_free(ctx);
-    cleanup_openssl();
 }
