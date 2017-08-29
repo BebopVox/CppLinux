@@ -1,3 +1,11 @@
+/*
+ * Install:
+ *  apt-get install openssl libssl-dev
+ *
+ * Add to .pro:
+ *  LIBS += -lssl -lcrypto
+ *
+ */
 #include "breakermindsslserver.h"
 
 #include <iostream>
