@@ -19,3 +19,10 @@ echo "" | openssl s_client -showcerts -connect 127.0.0.1:3333 -CAfile /home/user
 # In wireshark need set TLS ports in settings
 https://ask.wireshark.org/questions/34075/why-wireshark-cannot-display-tlsssl
 
+# Linux proccess max limit 
+### Set linux max proccess limit (1 per MB) 2GB
+ulimit -u 2044
+### Show limits
+ulimit -a
+<br>ulimit -u
+<br>http://rudametw.github.io/blog/posts/2014.04.10/not-enough-threads.html
