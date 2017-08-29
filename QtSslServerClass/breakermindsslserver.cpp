@@ -5,6 +5,13 @@
  * Add to .pro:
  *  LIBS += -lssl -lcrypto
  *
+ * Set linux max proccess limit (1 per MB) 2GB
+ * ulimit -u 2044
+ *
+ * Show limits
+ * ulimit -a
+ * ulimit -u
+ *
  */
 #include "breakermindsslserver.h"
 
