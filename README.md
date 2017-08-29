@@ -21,7 +21,7 @@ https://ask.wireshark.org/questions/34075/why-wireshark-cannot-display-tlsssl
 
 # Linux proccess max limit 
 ### Set linux max proccess limit (1 per MB) 2GB
-ulimit -u 2044
+ulimit -u 2048
 ### Show limits
 ulimit -a
 <br>ulimit -u
