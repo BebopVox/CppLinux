@@ -31,5 +31,5 @@ ulimit -a
 ## Convsert string to const char*
 const char* c = txt.c_str();
 
-#$ Convsert string to char* 
+## Convsert string to char* 
 char* c = (char*)txt.c_str();
