@@ -32,4 +32,4 @@ ulimit -a
 const char* c = txt.c_str();
 
 ## Convsert string to char* 
-char* c = (char*)txt.c_str();
+char* c = (char*) txt.c_str();
