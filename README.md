@@ -26,3 +26,10 @@ ulimit -u 2048
 ulimit -a
 <br>ulimit -u
 <br>http://rudametw.github.io/blog/posts/2014.04.10/not-enough-threads.html
+
+
+## Convsert string to const char*
+const char* c = txt.c_str();
+
+#$ Convsert string to char* 
+char* c = (char*)txt.c_str();
