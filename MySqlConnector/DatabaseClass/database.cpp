@@ -1,23 +1,12 @@
 #include "database.h"
-#include <stdlib.h>
-#include <iostream>
 
-#include "mysql_connection.h"
-#include "mysql_driver.h"
-#include "mysql_error.h"
-
-// usr/include/cppconn
-#include <cppconn/driver.h>
-#include <cppconn/exception.h>
-#include <cppconn/resultset.h>
-#include <cppconn/statement.h>
-#include <cppconn/prepared_statement.h>
-
-using namespace std;
-
-Database::Database()
+Database::Database(string Hostname, string User, string Pass)
 {
-
+    /* Create a connection */
+    driver = get_driver_instance();
+    con = driver->connect("tcp://"+Hostname+":3306", User, Pass);
+    /* Connect to the MySQL database */
+    con->setSchema("BreakermindSMTP");
 }
 
 void Database::Connect(){
@@ -25,17 +14,6 @@ void Database::Connect(){
     cout << "Running mysql connector" << endl;
 
     try {
-      sql::Driver *driver;
-      sql::Connection *con;
-      sql::Statement *stmt;
-      sql::ResultSet *res;
-
-      /* Create a connection */
-      driver = get_driver_instance();
-      con = driver->connect("tcp://localhost:3306", "mysql", "pass");
-      /* Connect to the MySQL database */
-      con->setSchema("BreakermindSMTP");
-
       stmt = con->createStatement();
       res = stmt->executeQuery("SELECT * FROM mailbox;");
       while (res->next()) {
@@ -48,7 +26,6 @@ void Database::Connect(){
       }
       delete res;
       delete stmt;
-      delete con;
 
     } catch (sql::SQLException &e) {
       cout << "# ERR: SQLException in " << __FILE__;
@@ -61,18 +38,6 @@ void Database::Connect(){
 
 void Database::InsertMsg(){
     try{
-        sql::Driver *driver;
-        sql::Connection *con;
-        sql::Statement *stmt;
-        sql::ResultSet *res;
-
-        /* Create a connection */
-        driver = get_driver_instance();
-        con = driver->connect("tcp://localhost:3306", "mysql", "pass");
-        /* Connect to the MySQL database */
-        con->setSchema("BreakermindSMTP");
-
-        sql::PreparedStatement  *prep_stmt;
         prep_stmt = con->prepareStatement("INSERT INTO test(label) VALUES (?)");
 
         //prep_stmt->setInt(1, 1);
@@ -96,6 +61,5 @@ void Database::InsertMsg(){
       cout << " (MySQL error code: " << e.getErrorCode();
       cout << ", SQLState: " << e.getSQLState() << " )" << endl;
     }
-
 }
 
