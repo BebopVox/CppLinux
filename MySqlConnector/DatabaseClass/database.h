@@ -27,10 +27,10 @@ private:
     sql::PreparedStatement  *prep_stmt;
 
 public:
-    Database(string Hostname, string User, string Pass);
+    Database(string Hostname, string Port, string User, string Pass);
     void Connect();
     void InsertMsg();
-
+    unsigned long long LastInsertID();
 };
 
 #endif // DATABASE_H
