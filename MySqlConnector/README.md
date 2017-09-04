@@ -3,7 +3,7 @@
 # Install this files in debian mysql connector!!!!
 apt-get install libmysqlcppconn-dev 
 
-# Inslatt openssl and lib ssl
+# Inslatt openssl and lib ssl and lib crypto
 apt-get install openssl libssl-dev
 
 # Install  mysql not connector and g++
