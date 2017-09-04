@@ -24,6 +24,9 @@ void Database::Connect(){
         /* Access column data by numeric offset, 1 is the first column */
         cout << res->getString(1) << endl;
       }
+      // Rows number  
+      cout << "Number of rows : " << res->rowsCount() << endl;
+        
       delete res;
       delete stmt;
 
