@@ -19,14 +19,19 @@
 #include <iostream>
 #include <fstream>
 #include <time.h>
+#include <vector>
 
 using namespace std;
 
 class DnsSPF
 {
 public:
-    DnsSPF(std::string domain);
+    bool DnsSPFvalidIP(string host, string ip);
+    void DnsMX(std::string domain);
+    vector<string> DnsTXT(std::string domain);
     std::string hostname_to_ip(std::string hostname);
+    bool is_ipv4_address(const string& str);
+    bool is_ipv6_address(const string& str);
 };
 
 #endif // DNSSPF_H
