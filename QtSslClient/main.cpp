@@ -13,6 +13,12 @@
 
 #define FAIL    -1
 
+// install debian:
+// apt-get install g++ or build-essential 
+// apt-get install openssl libssl-dev
+// Compile with (-std=c++11):
+// g++ -o output main.cpp -lssl -lcrypto
+
 // OpenConnection - create socket and connect to server.
 int OpenConnection(const char *hostname, int port)
 {   int sd;
