@@ -1,7 +1,5 @@
 #include <QCoreApplication> // delete if dont need Qt
 
-// http://www.bogotobogo.com/cplusplus/multithreading_pthread.php
-
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,10 +11,12 @@ using namespace std;
 
 void *worker_thread(void *i)
 {
-    while(1){
-        cout << "This is worker_thread() "  << i << "\n";
-        printf("This is worker_thread #%ld \n", (long)i);
-        sleep(1);
+    int j = 0;
+    while(j < 25){
+        // cout << "This is worker_thread() "  << i << "\n";
+        printf("This is worker_thread #%ld loop: %ld \n", (long)i, (long)j);
+        sleep((long)i);
+        j++;
     }
     pthread_exit(NULL);
 }
@@ -46,3 +46,5 @@ int main(int argc, char *argv[])
     return a.exec(); // delete if dont need Qt
 }
 
+// Read more on:
+// http://www.bogotobogo.com/cplusplus/multithreading_pthread.php
