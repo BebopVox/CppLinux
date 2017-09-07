@@ -15,7 +15,10 @@ void *worker_thread(void *i)
     while(j < 25){
         // cout << "This is worker_thread() "  << i << "\n";
         printf("This is worker_thread #%ld loop: %ld \n", (long)i, (long)j);
-        sleep((long)i);
+        // seconds
+        // sleep((long)i);
+        // microseconds on linux 1s = 1000000
+        usleep((long)i*1000000);
         j++;
     }
     pthread_exit(NULL);
