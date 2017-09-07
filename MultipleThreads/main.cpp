@@ -23,7 +23,7 @@ void *worker_thread(void *i)
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
+    QCoreApplication a(argc, argv); // delete if dont need Qt
 
     pthread_t thread1;
 
@@ -43,6 +43,6 @@ int main(int argc, char *argv[])
         i++;
     }
 
-    return a.exec();
+    return a.exec(); // delete if dont need Qt
 }
 
