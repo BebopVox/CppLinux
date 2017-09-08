@@ -188,9 +188,6 @@ void BreakermindSslServer::Start(int Port, string Certificate, string Certificat
         printf("Connection: %s:%d\n", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
 
         // new thread proccess
-        pid_t pid;
-        int currpid = 0 ;
-
         struct thread_info tinfo;
         tinfo.client = client;
         tinfo.ctx = ctx;
@@ -208,8 +205,7 @@ void BreakermindSslServer::Start(int Port, string Certificate, string Certificat
         }
 
         if (ret > 0) {
-            currpid = ret;
-            fprintf(stderr, "Mam mowego klienta, pid=%d\n", currpid);
+            fprintf(stderr, "Mam mowego klienta, pid=%d\n", ret);
             continue;
         }
 
@@ -218,20 +214,7 @@ void BreakermindSslServer::Start(int Port, string Certificate, string Certificat
             exit(EXIT_FAILURE);
         }
 
-
-
-
-        // Server loop send and receive data from clients
-        // ServerLoop(ssl);
-
-
         // printf("SSL pid %s", getpid());
-        //SSL_free(ssl);
-        //close(client);
-        // kill process
-        // execl(kill( pid, 1 ));
-        // kill(getpid(), SIGKILL);
-        // kill(getpid(), SIGTERM);
     }
 
     close(sock);
@@ -319,6 +302,7 @@ void BreakermindSslServer::ServerLoop(SSL_CTX *ctx, int client){
             z = 0;
             printf("%s\n", "Close connection with client ");
             SSL_shutdown(ssl);
+            close(client);
             // kill chld proccess
             // kill(getpid(), SIGKILL);
             pthread_exit(NULL);
