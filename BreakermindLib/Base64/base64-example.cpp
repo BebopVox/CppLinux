@@ -3,8 +3,8 @@
 
 int main() {
   const std::string s = 
-    "René Nyffenegger\n"
-    "http://www.renenyffenegger.ch\n"
+    "Hello string\n"
+    "http:/breakermind.com\n"
     "passion for data\n";
 
   std::string encoded = base64_encode(reinterpret_cast<const unsigned char*>(s.c_str()), s.length());
@@ -19,6 +19,13 @@ int main() {
 
   std::cout << "encoded1: " << std::endl << encoded1 << std::endl << std::endl;
   std::cout << "decoded1: " << std::endl << decoded1 << std::endl;
+
+  // with string
+  std::string encoded2 = base64_encode(s);
+  std::string decoded2 = base64_decode(encoded2);
+
+  std::cout << "encoded2: " << std::endl << encoded2 << std::endl << std::endl;
+  std::cout << "decoded2: " << std::endl << decoded2 << std::endl;
 
   // Test all possibilites of fill bytes (none, one =, two ==)
   // References calculated with: https://www.base64encode.org/
