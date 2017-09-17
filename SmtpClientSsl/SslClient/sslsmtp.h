@@ -29,7 +29,7 @@ using namespace std;
 class SslSMTP
 {
 private:
-    int Port = 587;
+    int Port = 25;
 public:
     SslSMTP(int port);
     // Create mime message and send
