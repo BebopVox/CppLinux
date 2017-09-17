@@ -1,0 +1,18 @@
+---HEADER-UTF8-BASE64
+{"header":[{"row":"Date 2017-06-09 22:33:55"},{"row":"charset=utf8"}]}[end]
+---FROM
+{"from":[{"name":"Zenobiusz","email":"hello@fxstar.eu"}]}
+{"from":[{"name":"Zenobiusz","email":"hello@fxstar.eu"}, {"name":"Zenobiusz2","email":"email999@kkk.ddf"}]}
+---RCPT
+{"rcpt":[{"name":"Zenobiusz","email":"hello@fxstar.eu"}]}
+{"rcpt":[{"name":"Zenobiusz","email":"hello@fxstar.eu"}, {"name":"Zenobiusz2","email":"email333@kkk.ddf"}]}
+---SUBJECT
+{"subject":"Jakiś temat wiadomosci"}
+{"subject":"Jakiś temat wiadomosci"}
+---HTML
+{"html":"Jakas tresc wiadomosci"}[end]
+---+++---FILES
+{"files":[{"file":"file1.jpg"},{"file":"img.zip"},{"file":"cv.pdf"}]}[end]
+---FILESDATA
+{"file":[{"name":"file1.jpg","content":"fileContentHere"}]}{"file":[{"name":"img.zip","content":"fileContentHere"}]}{"file":[{"name":"cv.pdf","content":"fileContentHere"}]}[end]
+---END
