@@ -28,4 +28,14 @@ int main(int count, char *strings[])
     // send email with attachment
     smtp.Send("qflash.pl", "", "", "");
     cout << "\r\nStop smtp";
+    
+    /*
+    // Get email domain mx records
+    DnsRecords dns = DnsRecords();
+    vector<string> mx = dns.getMX("hello@gmail.com",1,1);
+    // show records
+    for(int i = 0; i < mx.size(); i++){
+        cout << "MX Hosts " <<  mx.at(i) << endl;
+    }
+    */
 }
