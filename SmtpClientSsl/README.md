@@ -8,3 +8,7 @@
 
 #### Install:
 apt-get install openssl libssl-dev
+
+
+### Quoted printble
+https://github.com/bluetiger9/Qt-Quoted-Printable
