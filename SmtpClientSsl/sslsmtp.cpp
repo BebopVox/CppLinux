@@ -118,6 +118,19 @@ int SslSMTP::OpenConnection(const char *hostname, int port)
         abort();
     }
     sd = socket(PF_INET, SOCK_STREAM, 0);
+    // socket time out
+    struct timeval timeout;
+    timeout.tv_sec = 10;
+    timeout.tv_usec = 0;
+
+    if (setsockopt (sd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,
+                sizeof(timeout)) < 0)
+        cout << "setsockopt failed\n";
+
+    if (setsockopt (sd, SOL_SOCKET, SO_SNDTIMEO, (char *)&timeout,
+                sizeof(timeout)) < 0)
+        cout << "setsockopt failed\n";
+ 
     bzero(&addr, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
