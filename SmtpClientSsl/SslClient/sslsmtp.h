@@ -33,11 +33,6 @@ private:
 public:
     SslSMTP(int port);
     // Create mime message and send
-    void From(string email);
-    void ReplyTo(string email);
-    void addTo(string email);
-    void addHtml(string html);
-    void addAttachment(string file);
     int Send();
     // ssl client
     bool Send(string hostnameMX, string from, string to, string replyto, string subject, string msg, string msghtml, vector<string> files);
@@ -49,6 +44,12 @@ public:
     string fileBasename(string path);
     std::string getFileContent(const std::string& path);
     std::string get_file_contents(const char *filename);
+    // file mime type
+    const char* GetMimeTypeFromFileName( char* szFileExt);
+    string GetFileExtension(const std::string& FileName);
+
+
+    static const char MimeTypes[][2][128];
 };
 
 #endif // SSLSMTP_H
