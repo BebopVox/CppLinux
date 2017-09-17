@@ -12,6 +12,12 @@
 #include <iostream>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+// quoted
+#include <iomanip>
+#include <sstream>
+// socket time out
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #define FAIL    -1
 
