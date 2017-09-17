@@ -43,6 +43,7 @@ public:
     void ShowCerts(SSL* ssl);
     // quoted string
     void quoted(std::string str);
+    string Date(bool utc = 0);
 };
 
 #endif // SSLSMTP_H
