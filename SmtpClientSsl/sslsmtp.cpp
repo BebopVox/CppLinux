@@ -170,3 +170,19 @@ void SslSMTP::ShowCerts(SSL* ssl)
         printf("No certificates.\n");
     }
 }
+
+void SslSMTP::quoted(string str){
+    std::stringstream ss;
+        std::string in = "String with spaces, and embedded \"quotes\" too";
+        if(str.length() > 0){
+            in = str;
+        }
+        std::string out;
+
+        ss << std::quoted(in);
+        std::cout << "read in     [" << in << "]\n"
+                  << "stored as   [" << ss.str() << "]\n";
+
+        ss >> std::quoted(out);
+        std::cout << "written out [" << out << "]\n";
+}
