@@ -118,9 +118,11 @@ bool SslSMTP::Send(string hostnameMX, string from, string to, string replyto, st
         char buf[1024];
         int bytes;
         char *hostname, *portnum;
+        cout << "PORT " << Port;
 
+        // SMTP hostname and port number
         hostname = (char*)hostnameMX.c_str();
-        portnum = (char*)"587";
+        portnum = (char*)std::to_string(Port).c_str();
 
         ctx = InitCTX();
         server = OpenConnection(hostname, atoi(portnum));
