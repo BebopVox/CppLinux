@@ -35,6 +35,8 @@ public:
     int OpenConnection(const char *hostname, int port);
     SSL_CTX* InitCTX(void);
     void ShowCerts(SSL* ssl);
+    // quoted string
+    void quoted(std::string str);
 };
 
 #endif // SSLSMTP_H
