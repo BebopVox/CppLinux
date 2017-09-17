@@ -199,3 +199,13 @@ void SslSMTP::quoted(string str){
         ss >> std::quoted(out);
         std::cout << "written out [" << out << "]\n";
 }
+
+string SslSMTP::Date(bool utc){
+    time_t now = time(0);
+    char* dt = ctime(&now);
+    if(utc){
+        tm *gmtm = gmtime(&now);
+        dt = asctime(gmtm);
+    }
+    return std::string(dt);
+}
