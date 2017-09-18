@@ -151,6 +151,7 @@ bool SslSMTP::Send(string hostnameMX, string from, string to, string replyto, st
             bytes = SSL_read(ssl, buf, sizeof(buf));
             buf[bytes] = 0;
             printf("1 Received from server: %s\n", buf);
+            if(!Contain(std::string(buf), "250"))return 0;
 
             std::ostringstream f1;
             f1 << "mail from: " << from << "\r\n";
@@ -160,6 +161,7 @@ bool SslSMTP::Send(string hostnameMX, string from, string to, string replyto, st
             bytes = SSL_read(ssl, buf, sizeof(buf));
             buf[bytes] = 0;
             printf("2 Received from server: %s\n", buf);
+            if(!Contain(std::string(buf), "250"))return 0;
 
             std::ostringstream f2;
             f2 << "rcpt to: " << to << "\r\n";
@@ -169,12 +171,14 @@ bool SslSMTP::Send(string hostnameMX, string from, string to, string replyto, st
             bytes = SSL_read(ssl, buf, sizeof(buf));
             buf[bytes] = 0;
             printf("3 Received from server: %s\n", buf);
+            if(!Contain(std::string(buf), "250"))return 0;
 
             char *data = (char*)"DATA\r\n";
             SSL_write(ssl, data, strlen(data));
             bytes = SSL_read(ssl, buf, sizeof(buf));
             buf[bytes] = 0;
             printf("4 Received from server: %s\n", buf);
+            if(!Contain(std::string(buf), "354"))return 0;
 
             std::string Encoding = "iso-8859-2"; // charset: utf-8, utf-16, iso-8859-2, iso-8859-1
 
@@ -221,13 +225,14 @@ bool SslSMTP::Send(string hostnameMX, string from, string to, string replyto, st
 
              // create mime message string
              std::string mimemsg = m.str();
-             cout << mimemsg;
+             // cout << mimemsg;
 
             char * mdata = (char*)mimemsg.c_str();
             SSL_write(ssl, mdata, strlen(mdata));
             bytes = SSL_read(ssl, buf, sizeof(buf));
             buf[bytes] = 0;
             printf("5 Received from server: %s\n", buf);
+            if(!Contain(std::string(buf), "250"))return 0;
 
             SSL_free(ssl);
             return 1;
@@ -266,14 +271,14 @@ int SslSMTP::OpenConnection(const char *hostname, int port)
     bzero(&addr, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
-        addr.sin_addr.s_addr = *(long*)(host->h_addr);
-        if ( connect(sd, (struct sockaddr*)&addr, sizeof(addr)) != 0 )
-        {
-            close(sd);
-            perror(hostname);
-            abort();
-        }
-        return sd;
+    addr.sin_addr.s_addr = *(long*)(host->h_addr);
+    if ( connect(sd, (struct sockaddr*)&addr, sizeof(addr)) != 0 )
+    {
+        close(sd);
+        perror(hostname);
+        abort();
+    }
+    return sd;
 }
 
 // InitCTX - initialize the SSL engine.
@@ -373,6 +378,13 @@ std::string SslSMTP::get_file_contents(const char *filename)
   throw(errno);
 }
 
+bool SslSMTP::Contain(std::string str, std::string search){
+    std::size_t found = str.find(search);
+    if (found!=std::string::npos){
+        return 1;
+    }
+    return 0;
+}
 
 std::string SslSMTP::GetFileExtension(const std::string& FileName)
 {
@@ -383,8 +395,7 @@ std::string SslSMTP::GetFileExtension(const std::string& FileName)
 
 const char* SslSMTP::GetMimeTypeFromFileName( char* szFileExt)
 {
-    cout << "EXT " << szFileExt;
-
+    // cout << "EXT " << szFileExt;
     for (int i = 0; i < sizeof (MimeTypes) / sizeof (MimeTypes[0]); i++)
     {
         if (strcmp(MimeTypes[i][0],szFileExt) == 0)
