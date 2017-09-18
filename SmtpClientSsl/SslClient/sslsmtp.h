@@ -30,12 +30,13 @@ class SslSMTP
 {
 private:
     int Port = 25;
+    std::string HostnameMX = "localhost";
 public:
-    SslSMTP(int port);
+    SslSMTP(string hostnameMX, int port);
     // Create mime message and send
     int Send();
     // ssl client
-    bool Send(string hostnameMX, string from, string to, string replyto, string subject, string msg, string msghtml, vector<string> files);
+    bool Send(string from, string to, string replyto, string subject, string msg, string msghtml, vector<string> files);
     int OpenConnection(const char *hostname, int port);
     SSL_CTX* InitCTX(void);
     void ShowCerts(SSL* ssl);
