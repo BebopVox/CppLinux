@@ -102,14 +102,15 @@ const char SslSMTP::MimeTypes[][2][128] =
     {"flv",    "video/x-flv"}
 };
 
-SslSMTP::SslSMTP(int port = 0)
+SslSMTP::SslSMTP(std::string hostnameMX, int port = 0)
 {
     if(port > 0){
         Port = port;
     }
+    HostnameMX = hostnameMX;
 }
 
-bool SslSMTP::Send(string hostnameMX, string from, string to, string replyto, string subject, string msg, string msghtml, vector<string> files)
+bool SslSMTP::Send(string from, string to, string replyto, string subject, string msg, string msghtml, vector<string> files)
 {
      try{
         SSL_CTX *ctx;
@@ -121,7 +122,7 @@ bool SslSMTP::Send(string hostnameMX, string from, string to, string replyto, st
         //cout << "PORT " << Port;
 
         // SMTP hostname and port number
-        hostname = (char*)hostnameMX.c_str();
+        hostname = (char*)HostnameMX.c_str();
         portnum = (char*)std::to_string(Port).c_str();
 
         ctx = InitCTX();
