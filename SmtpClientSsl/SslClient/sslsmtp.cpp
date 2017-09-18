@@ -1,10 +1,10 @@
 #include "sslsmtp.h"
 #include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstring>
-#include <cstdio>
-#include <algorithm>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <cstring>
+// #include <cstdio>
+// #include <algorithm>
 
 // BreakermindLib base64
 #include "BreakermindLib/breakermind.h"
@@ -118,7 +118,7 @@ bool SslSMTP::Send(string hostnameMX, string from, string to, string replyto, st
         char buf[1024];
         int bytes;
         char *hostname, *portnum;
-        cout << "PORT " << Port;
+        //cout << "PORT " << Port;
 
         // SMTP hostname and port number
         hostname = (char*)hostnameMX.c_str();
@@ -143,20 +143,28 @@ bool SslSMTP::Send(string hostnameMX, string from, string to, string replyto, st
             buf[bytes] = 0;
             printf("Received from server: %s\n", buf);
 
-            char *helo = (char*)"HELO breakermind.com\r\n";
+            std::ostringstream f0;
+            f0 << "HELO localhost\r\n";
+            std::string f00 = f0.str();
+            char *helo = (char*)f00.c_str();
             SSL_write(ssl, helo, strlen(helo));
             bytes = SSL_read(ssl, buf, sizeof(buf));
             buf[bytes] = 0;
             printf("1 Received from server: %s\n", buf);
 
-            char *fromemail = (char*)"mail from: <hello@breakermind.com>\r\n";
+            std::ostringstream f1;
+            f1 << "mail from: " << from << "\r\n";
+            std::string f11 = f1.str();
+            char *fromemail = (char*)f11.c_str();
             SSL_write(ssl, fromemail, strlen(fromemail));
             bytes = SSL_read(ssl, buf, sizeof(buf));
             buf[bytes] = 0;
             printf("2 Received from server: %s\n", buf);
 
-            // char *rcpt = "rcpt to: <fxstareu@gmail.com>\r\n";
-            char *rcpt = (char*)"rcpt to: <info@qflash.pl>\r\n";
+            std::ostringstream f2;
+            f2 << "rcpt to: " << to << "\r\n";
+            std::string f22 = f2.str();
+            char *rcpt = (char*)f22.c_str();
             SSL_write(ssl, rcpt, strlen(rcpt));
             bytes = SSL_read(ssl, buf, sizeof(buf));
             buf[bytes] = 0;
@@ -168,12 +176,12 @@ bool SslSMTP::Send(string hostnameMX, string from, string to, string replyto, st
             buf[bytes] = 0;
             printf("4 Received from server: %s\n", buf);
 
+            std::string Encoding = "iso-8859-2"; // charset: utf-8, utf-16, iso-8859-2, iso-8859-1
 
             std::ostringstream m;
-
              m << "From: " << from << "\r\n";
              m << "To: " << to << "\r\n";
-             m << "Subject: =?iso-8859-2?Q?"<< subject << "\r\n";
+             m << "Subject: =?" << Encoding << "?Q?"<< subject << "\r\n";
              m << "Reply-To: " << from << "\r\n";
              m << "Return-Path: " << from << "\r\n";
              m << "Date: "<< Date(1) << "\r\n";
@@ -182,11 +190,11 @@ bool SslSMTP::Send(string hostnameMX, string from, string to, string replyto, st
              m << "--ToJestSeparator0000\r\n";
              m << "Content-Type: multipart/alternative; boundary=\"ToJestSeparatorZagniezdzony1111\"\r\n\r\n";
              m << "--ToJestSeparatorZagniezdzony1111\r\n";
-             m << "Content-Type: text/plain; charset=\"iso-8859-2\"\r\n";
+             m << "Content-Type: text/plain; charset=\"" << Encoding << "\"\r\n";
              m << "Content-Transfer-Encoding: quoted-printable\r\n\r\n";
              m << msg << "\r\n\r\n";
              m << "--ToJestSeparatorZagniezdzony1111\r\n";
-             m << "Content-Type: text/html; charset=\"iso-8859-2\"\r\n";
+             m << "Content-Type: text/html; charset=\"" << Encoding << "\"\r\n";
              m << "Content-Transfer-Encoding: quoted-printable\r\n\r\n";
              m << msghtml << "\r\n\r\n";
              m << "--ToJestSeparatorZagniezdzony1111--\r\n";
@@ -198,10 +206,8 @@ bool SslSMTP::Send(string hostnameMX, string from, string to, string replyto, st
                     std::string fc = base64_encode(get_file_contents(filename.c_str()));
                     std::string extension = GetFileExtension(filename);
                     const char *mimetype = GetMimeTypeFromFileName((char*)extension.c_str());
-                    cout << "MIME " << mimetype << endl << extension << endl;
-
+                    // cout << "MIME " << mimetype << endl << extension << endl;
                     // cout << "FILE CONTENT " << fc << endl;
-
                     m << "--ToJestSeparator0000\r\n";
                     m << "Content-Type: " << mimetype << "; name=\"" << filename << "\"\r\n";
                     m << "Content-Transfer-Encoding: base64\r\n";
@@ -218,7 +224,6 @@ bool SslSMTP::Send(string hostnameMX, string from, string to, string replyto, st
              cout << mimemsg;
 
             char * mdata = (char*)mimemsg.c_str();
-
             SSL_write(ssl, mdata, strlen(mdata));
             bytes = SSL_read(ssl, buf, sizeof(buf));
             buf[bytes] = 0;
