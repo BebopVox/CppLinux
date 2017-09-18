@@ -47,7 +47,7 @@ public:
     // file mime type
     const char* GetMimeTypeFromFileName( char* szFileExt);
     string GetFileExtension(const std::string& FileName);
-
+    bool Contain(std::string str, std::string search);
 
     static const char MimeTypes[][2][128];
 };
