@@ -60,13 +60,13 @@ int main(int count, char *strings[])
     // cout << smtp.Date(1) << endl;
     // smtp.Send("aspmx.l.google.com", "", "", "");
     // add files path
-
-    SslSMTP smtp = SslSMTP(25);
+    // smtp server mx hostname, port
+    SslSMTP smtp = SslSMTP("qflash.pl",25);
     vector<string> files;
     files.push_back("file9.jpg");
     files.push_back("filek.pdf");
     // send email
-    smtp.Send("qflash.pl", "<hello@breakermind.com>", "<info@qflash.pl>", "<hello@breakermind.com>", "Hello Zombie=2C_czy_um=F3wisz_si=EA_ze_mn=B1=3F?=", "WIadomosć tekstowa dla usera", "<h1>Hello from html msg.</h1>", files);
+    smtp.Send("<hello@breakermind.com>", "<info@qflash.pl>", "<hello@breakermind.com>", "Hello Zombie=2C_czy_um=F3wisz_si=EA_ze_mn=B1=3F?=", "WIadomosć tekstowa dla usera", "<h1>Hello from html msg.</h1>", files);
 
     cout << "\r\nStop smtp";
 
