@@ -21,6 +21,8 @@
 // fstream
 #include <fstream>
 #include <cerrno>
+// signals errors
+#include <signal.h>
 
 #define FAIL    -1
 
@@ -38,8 +40,10 @@ public:
     // ssl client
     bool Send(string from, string to, string replyto, string subject, string msg, string msghtml, vector<string> files);
     int OpenConnection(const char *hostname, int port);
+    void socketTimeout(int sd, int timeoutseconds);
     SSL_CTX* InitCTX(void);
     void ShowCerts(SSL* ssl);
+    void sslError(SSL *ssl, int received);
     void quoted(std::string str);
     string Date(bool utc = 0);
     string fileBasename(string path);
