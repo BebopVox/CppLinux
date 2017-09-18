@@ -3,7 +3,7 @@ Qt project
 
 # About
 How to get mx hosts for email addres from dns server and send email to all servers on different ports(25,587, no authentication needed).
-<br>Example show how send email to first working smtp server.
+<br>Example show how send email to first working smtp server. Only servers with tls,ssl connection allowed (ssl client).
 
 # Install and compile
 ### apt-get install libssl-dev openssl
