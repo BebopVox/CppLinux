@@ -1,3 +1,15 @@
+// correct
+// email
+std::regex pattern("^(\\w+)(\\.|_|-)?(\\w*)@(\\w+)(\\.(\\w+))+($|\\n|\\r\\n|\\0))");
+// smtp
+std::regex pattern("^((ehlo) (([a-zA-Ząęśćźżół]|[a-zA-Ząęśćźżół][ąęśćźżóła-zA-Z0-9\\-]*[ąęśćźżóła-zA-Z0-9])\\.)*([ąęśćźżółA-Za-z]|[ąęśćźżółA-Za-z][ąęśćźżółA-Za-z0-9\\-]*[ąęśćźżółA-Za-z0-9])($|\\r\\n|\\n|\\0))|^((helo) (([a-zA-Ząęśćźżół]|[a-zA-Ząęśćźżół][ąęśćźżóła-zA-Z0-9\\-]*[ąęśćźżóła-zA-Z0-9])\\.)*([ąęśćźżółA-Za-z]|[ąęśćźżółA-Za-z][ąęśćźżółA-Za-z0-9\\-]*[ąęśćźżółA-Za-z0-9])($|\\r\\n|\\n|\\0))", std::regex_constants::icase );
+std::regex pattern("^((mail from:)<(\\w+)(\\.|_|-)?(\\w*)@(\\w+)\\.(\\w+)>($|\\n|\\r\\n|\\0))|^((mail from:) <(\\w+)(\\.|_|-)?(\\w*)@(\\w+)\\.(\\w+)>($|\\n|\\r\\n|\\0))|^((mail from:) (\\w+)(\\.|_|-)?(\\w*)@(\\w+)\.(\\w+)($|\\n|\\r\\n|\\0))|^((mail from:)(\\w+)(\\.|_|-)?(\\w*)@(\\w+)\\.(\\w+)($|\\n|\\r\\n|\\0))", std::regex_constants::icase );
+std::regex pattern("^((rcpt to:)<(\\w+)(\\.|_|-)?(\\w*)@(\\w+)\\.(\\w+)>($|\\n|\\r\\n|\\0))|^((rcpt to:) <(\\w+)(\\.|_|-)?(\\w*)@(\\w+)\\.(\\w+)>($|\\n|\\r\\n|\\0))|^((rcpt to:)(\\w+)(\\.|_|-)?(\\w*)@(\\w+)\\.(\\w+)($|\\n|\\r\\n|\\0))|^((rcpt to:) (\\w+)(\\.|_|-)?(\\w*)@(\\w+)\\.(\\w+)($|\\n|\\r\\n|\\0))", std::regex_constants::icase );
+std::regex pattern("(\\.\\n)|(\\n\\.\\n)|(\\.$)|(\\.\\r\\n)|(\\r\\n\\.\\r\\n$|(\\.\\r\\n))");
+// smtp end DATA
+std::regex pattern("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$");
+
+// demo examples
 bool BreakermindSslServer::validEmail(std::string email)
 {
    // define a regular expression
