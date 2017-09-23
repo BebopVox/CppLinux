@@ -7,10 +7,8 @@ Message body
 |multipart/mixed --boundary1
 |--boundary1
 |	multipart/related --boundary2
-|	|
 |	|--boundary2
 |	|	multipart/alternative --boundary3
-|	|	|
 |	|	|--boundary3
 |	|	|text/plain
 |	|	|--boundary3
