@@ -1,0 +1,31 @@
+Header
+|From: email
+|To: email
+|MIME-Version: 1.0
+|Content-Type: multipart/mixed; boundary="boundary1";
+|multipart/mixed --boundary1
+|--boundary1
+|	multipart/related --boundary2
+|	|
+|	|--boundary2
+|	|	multipart/alternative --boundary3
+|	|	|
+|	|	|--boundary3
+|	|	|text/plain
+|	|	|--boundary3
+|	|	|text/html
+|	|	|--boundary3--
+|	|--boundary2	
+|	|Inline image
+|	|--boundary2	
+|	|Inline image
+|	|--boundary2--
+|--boundary1	
+|Attachment1
+|--boundary1
+|Attachment2
+|--boundary1
+|Attachment3
+|--boundary1--
+|
+.
