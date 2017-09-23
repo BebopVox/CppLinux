@@ -3,6 +3,7 @@ Header
 |To: email
 |MIME-Version: 1.0
 |Content-Type: multipart/mixed; boundary="boundary1";
+Message body
 |multipart/mixed --boundary1
 |--boundary1
 |	multipart/related --boundary2
