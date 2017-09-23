@@ -49,6 +49,15 @@ foreach($AllPartsUnique as $key => $one) {
 echo "<pre>";
  print_r($AllPartsUnique);
 
+preg_match_all('/(?<=((\n)To: )|(^To: ))(.*)+?(?=())/', $str, $to);
+echo "To " . $to[0][0];
+
+preg_match_all('/(?<=((\n)From: )|(^From: ))(.*)+?(?=())/', $str, $from);
+echo "From " . $from[0][0];
+
+preg_match_all('/(?<=((\n)Subject: )|(^Subject: ))(.*)+?(?=())/', $str, $subject);
+echo "Subject " . $subject[0][0];
+    
 // end script
 die();
 ?>
