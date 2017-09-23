@@ -34,7 +34,21 @@ foreach ($boundary[0] as $key => $v) {
   }
 }
 echo "<pre>";
-print_r($AllPartsUnique);
+// print_r($AllPartsUnique);
 
+
+
+foreach($AllPartsUnique as $key => $one) {
+  foreach ($boundary[0] as $find) {
+    if(strpos($one, $find) !== false){
+        unset($AllPartsUnique[$key]); 
+    }
+  }    
+}
+
+echo "<pre>";
+ print_r($AllPartsUnique);
+
+// end script
 die();
 ?>
