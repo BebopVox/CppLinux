@@ -7,3 +7,7 @@
 
 // Cut email from line with From: string with names and lastnames (Jan)
 // (?:\G(?!\A)|^From:).*?\s*\K([\w"\h]+[^\s,]+@[^,\s]+)
+
+// Get line from text with string
+// (\r?\nTo:.*)
+ 
