@@ -2,11 +2,14 @@
 // CUT EMAILS (works)
 // ([a-z-_.ąęśćźżńół]+)@((\w+\.)|(\w+-\w+\.))+(\w+)+
 
-// Cut email from line with From: string (Jan)
+// Cut email from line with From: string
 // (?:\G(?!\A)|^From:).*?\K([a-z-_.ąęśćźżńół]+)@((\w+\.)|(\w+-\w+\.))+(\w+)+
 
-// Cut email from line with From: string with names and lastnames (Jan)
+// Cut email from line with From: string with names and lastnames
 // (?:\G(?!\A)|^From:).*?\s*\K([\w"\h]+[^\s,]+@[^,\s]+)
+
+// Cut email from line with From: string with names and lastnames with polish letters
+// (?:\G(?!\A)|From:|^From).*?\s*\K([\wąęśćźżńół"\h]+[^\s,]+@[^,\s]+)
 
 // Get line from text with string
 // (\r?\nTo:.*)
