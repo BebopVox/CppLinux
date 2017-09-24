@@ -1,0 +1,9 @@
+
+// CUT EMAILS (works)
+// ([a-z-_.ąęśćźżńół]+)@((\w+)\.)+(\w+)+
+
+// Cut email from line with From: string (Jan)
+// (?:\G(?!\A)|^From:).*?\K([a-z-_.ąęśćźżńół]+)@((\w+\.)|(\w+-\w+\.))+(\w+)+
+
+// Cut email from line with From: string with names and lastnames (Jan)
+// (?:\G(?!\A)|^From:).*?\s*\K([\w"\h]+[^\s,]+@[^,\s]+)
