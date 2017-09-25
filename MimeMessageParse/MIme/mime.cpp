@@ -8,7 +8,8 @@ Mime::Mime()
 // email validate
 bool Mime::validEmail(std::string email){
     // std::regex pattern("[a-z0-9-_.ąęśćźżńół]+@[a-z0-9-_.ąęśćźżńół]+", std::regex_constants::icase);
-    std::regex pattern("^[a-z0-9-_.ąęśćźżńół]+@((\\w+([-.]))+(\\w+))+$", std::regex_constants::icase);
+    // std::regex pattern("^[a-z0-9-_.ąęśćźżńół]+@((\\w+([-.]))+(\\w+))+$", std::regex_constants::icase);
+    std::regex pattern("(((\\w+([-\\._])+)+|())\\w+@(\\w+([-\\.])+)+\\w+)", std::regex_constants::icase);
     // try to match the string with the regular expression
     return std::regex_match(email, pattern);
 }
@@ -16,7 +17,8 @@ bool Mime::validEmail(std::string email){
 // find emails
 vector<vector<string>> Mime::findEmails(const string& s)
 {
-    const string& reg_ex("[a-z0-9-_.ąęśćźżńół]+@((\\w+([-.]))+(\\w+))");
+    // const string& reg_ex("[a-z0-9-_.ąęśćźżńół]+@((\\w+([-.]))+(\\w+))");
+    const string& reg_ex("(((\\w+([-\\._])+)+|())\\w+@(\\w+([-\\.])+)+\\w+)");
     regex rx(reg_ex, regex_constants::icase);
     vector<vector<string>> captured_groups;
     vector<string> captured_subgroups;
