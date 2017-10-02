@@ -88,3 +88,11 @@ void BreakermindSslServer::waitForStarttls(int requiretls, int client){
         send(client, require, strlen(require), 0);
     }
 }
+
+bool BreakermindSslServer::Contain(std::string str, std::string search){
+    std::size_t found = str.find(search);
+    if (found!=std::string::npos){
+        return 1;
+    }
+    return 0;
+}
