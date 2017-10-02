@@ -2,6 +2,17 @@
 // int client = accept(sock, (struct sockaddr*)&addr, &len);
 // pid = fork();
 // waitForStarttls(1,client);
+// And 
+/*
+if (SSL_accept(ssl) <= 0) {
+    ERR_print_errors_fp(stderr);
+} else {
+    const char reply1[] = "220 Ready to start TLS\r\n";
+    SSL_write(ssl, reply1, strlen(reply1));
+}
+// Server loop send and receive data from clients
+*/
+
 
 void BreakermindSslServer::waitForStarttls(int requiretls, int client){
     try{
