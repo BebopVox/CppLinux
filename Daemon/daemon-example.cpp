@@ -35,9 +35,7 @@ int main(void) {
                 /* Log the failure */
                 exit(EXIT_FAILURE);
         }
-        
 
-        
         /* Change the current working directory */
         if ((chdir("/")) < 0) {
                 /* Log the failure */
