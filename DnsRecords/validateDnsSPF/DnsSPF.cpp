@@ -174,6 +174,7 @@ void DnsSPF::DnsMX(std::string domain)
                     //cout << ntohs(*((unsigned short*)ns_rr_rdata(rr) + 1)) << endl;
                     //cout << ntohs(*((unsigned short*)ns_rr_rdata(rr) + 2)) << endl;
 
+                    /*
                     // get the current time
                     time_t rawtime;
                     tm * ptm;
@@ -184,6 +185,7 @@ void DnsSPF::DnsMX(std::string domain)
                     ofstream ipaddr_log("ipaddr.log", ios::app);
                     ipaddr_log << (ptm->tm_hour+MST%24) << ":" << (ptm->tm_min) << " " << domain << " " << exchange << " (" << hostname_to_ip(exchange) << ")" << endl;
                     ipaddr_log.close();
+                    */
 
                   }
             #endif
@@ -191,6 +193,7 @@ void DnsSPF::DnsMX(std::string domain)
         // ---------
 }
 
+// return email mx hosts list from dns
 vector<string> DnsSPF::DnsMX2(std::string email)
 {
     string domain = "localhost";
@@ -236,11 +239,12 @@ vector<string> DnsSPF::DnsMX2(std::string email)
                     const uint16_t pri = ns_get16(rdata);
                     int len = dn_expand(nsbuf, nsbuf + 250, rdata + 2, exchange, sizeof(exchange));
                     // priority
-                    printf("Pri->%d\n", pri);
+                    // printf("Pri->%d\n", pri);
                     // hostname
-                    printf("Exchange->%s\n", exchange);
+                    // printf("Exchange->%s\n", exchange);
                     mxhosts.push_back(exchange);
 
+                    /*
                     // get the current time
                     time_t rawtime;
                     tm * ptm;
@@ -251,11 +255,12 @@ vector<string> DnsSPF::DnsMX2(std::string email)
                     ofstream ipaddr_log("ipaddr.log", ios::app);
                     ipaddr_log << (ptm->tm_hour+MST%24) << ":" << (ptm->tm_min) << " " << domain << " " << exchange << " (" << hostname_to_ip(exchange) << ")" << endl;
                     ipaddr_log.close();
-
+                    */
                   }
             #endif
         }
         // ---------
+        return mxhosts;
 }
 
 // Get ip from domain name
@@ -398,7 +403,7 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
 					}			
 				}
 				// ipv6:
-				if(Contain(record,"ip4:")){
+				if(Contain(record,"ip6:")){
 					string ip = RemoveSpaces(replaceAll(record,"ip6:"," "));
 					if(ip == ipAddress){
 						return 1;
@@ -413,7 +418,7 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
 				}
 				// mx records for domain
 				if(Contain(record,"mx") && record.length() == 2){
-					string email = "xxx@";
+					string email = "m@";
 					email.append(domain);
 					vector<string> mxhosts = DnsMX2(email);
 					for (int i = 0; i < mxhosts.size(); i++)
