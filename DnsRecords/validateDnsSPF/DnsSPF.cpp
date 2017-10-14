@@ -390,11 +390,7 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
 			// replace empty char
 			record = RemoveSpaces(record);			
 
-			if(record.length() > 0){
-				// +all, ~all - allow all records
-				if(Contain(record,"+all") || Contain(record,"~all")){
-					return 1;
-				}
+			if(record.length() > 0){				
 				// ipv4:
 				if(Contain(record,"ip4:")){
 					string ip = RemoveSpaces(replaceAll(record,"ip4:"," "));
@@ -445,7 +441,38 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
 						return 1;
 					}			
 				}
-				// all
+				// ptr - wszystkie servery z hostem z revers dns mogą wysyłać			
+				if(Contain(record,"ptr") && record.length() == 3){
+					// revers host
+					string ptr = ip_to_hostname(ipAddress);
+					// domena pasuje do revers
+					if(domain == ptr){
+						return 1;
+					}			
+				}
+				// ptr - wszystkie servery z hostem z revers dns mogą wysyłać			
+				if(Contain(record,"ptr:")){
+					string host = RemoveSpaces(replaceAll(record,"ptr:"," "));					
+					// revers host
+					string ptr = ip_to_hostname(ipAddress);					
+					// size
+					if(ptr.length() > host.length()){
+						int len = host.length();
+						ptr = substr(ptr.length()-len);
+						// revers host zawiera
+						if(ptr == host){
+							return 1;
+						}
+					}
+					if(ptr == host){
+						return 1;
+					}
+				}
+				// +all, ~all - allow all records
+				if(Contain(record,"+all") || Contain(record,"~all")){
+					return 1;
+				}
+				// -all
 				if(Contain(record,"-all")){
 					return 0;
 				}
