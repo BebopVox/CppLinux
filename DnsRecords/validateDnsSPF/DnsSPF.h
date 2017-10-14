@@ -1,7 +1,6 @@
 #ifndef DNSSPF_H
 #define DNSSPF_H
 
-
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,6 +40,7 @@ public:
     void RemoveSpaces(char* source);
     bool validSpfIP(string ip, string domain, string spf);
     string replaceAll(string s,string search,string replace);
+    vector<string> getDnsTXTSPF(std::string domain);
 };
 
 #endif // DNSSPF_H
