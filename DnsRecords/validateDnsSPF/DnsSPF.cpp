@@ -8,7 +8,7 @@
 // str sockadr
 #include <netdb.h>
 
-// find
+// find, find vectors
 #include <algorithm>
 
 // perror
@@ -22,7 +22,7 @@ using namespace std;
 // Check is server with this ip can send email for this domain
 bool DnsSPF::DnsSPFvalidIP(string host, string ip){
     // get DNS spf records ip addresses
-    vector<string> v = DnsTXT(host);
+    vector<string> v = getDnsTXT(host);
     // is allowed ip address
     if (std::find(v.begin(), v.end(), ip) != v.end())
     {
@@ -33,234 +33,284 @@ bool DnsSPF::DnsSPFvalidIP(string host, string ip){
 }
 
 // return list ip addresses from TXT dns txt records only: > SMTPspf:1.2.3.4
-vector<string> DnsSPF::DnsTXT(std::string domain)
+vector<string> DnsSPF::getDnsTXT(std::string domain)
 {
-    res_init();
-    vector<string> ips;
+	// ip list 
+	vector<string> ips;
 
-    u_char nsbuf[N];
-    char dispbuf[N];
-    ns_msg msg;
-    ns_rr rr;
-    int i, l;
+	try{
+	    res_init();	    
+	    u_char nsbuf[N];
+	    char dispbuf[N];
+	    ns_msg msg;
+	    ns_rr rr;
+	    int i, l;
 
-    // HEADER
-    // printf("Domain : %s\n", std::string(domain));
-	cout << "Domain " << std::string(domain) << endl;
+	    // l = res_query(domain.c_str(), ns_c_any, ns_t_txt, nsbuf, sizeof(nsbuf));
+	    l = res_query(domain.c_str(), C_IN, ns_t_txt, nsbuf, sizeof(nsbuf));
+	    if (l < 0)
+	    {
+	      perror(domain.c_str());
+	    } else {
+	        #ifdef USE_PQUERY
+	              /* this will give lots of detailed info on the request and reply */
+	              res_pquery(&_res, nsbuf, l, stdout);
+	        #else
+	              /* just grab the MX answer info */
+	              ns_initparse(nsbuf, l, &msg);
+	              l = ns_msg_count(msg, ns_s_an);
+	              for (i = 0; i < l; i++)
+	              {
+	                ns_parserr(&msg, ns_s_an, i, &rr);
+	                std::string spf = std::string((char*)ns_rr_rdata(rr));
+	                 // cout << "TXT " << spf << endl;
+	                if(spf.find(std::string("SMTPspf:")) != std::string::npos || spf.find(std::string("v=spf1")) != std::string::npos){
+	                    cout << "TXT " <<  spf << endl;
 
-    // MX RECORD
-    printf("TXT records : \n");
-    // l = res_query(domain.c_str(), ns_c_any, ns_t_txt, nsbuf, sizeof(nsbuf));
-    l = res_query(domain.c_str(), C_IN, ns_t_txt, nsbuf, sizeof(nsbuf));
-    if (l < 0)
-    {
-      perror(domain.c_str());
-    } else {
-        #ifdef USE_PQUERY
-              /* this will give lots of detailed info on the request and reply */
-              res_pquery(&_res, nsbuf, l, stdout);
-        #else
-              /* just grab the MX answer info */
-              ns_initparse(nsbuf, l, &msg);
-              l = ns_msg_count(msg, ns_s_an);
-              for (i = 0; i < l; i++)
-              {
-                ns_parserr(&msg, ns_s_an, i, &rr);
-                std::string spf = std::string((char*)ns_rr_rdata(rr));
-                 // cout << "TXT " << spf << endl;
-                if(spf.find(std::string("SMTPspf:")) != std::string::npos || spf.find(std::string("v=spf1")) != std::string::npos){
-                    cout << "TXT " <<  spf << endl;
-
-                    // const regex r("(\\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b)");
-                    // const regex r("(([0-9]{1,3}).([0-9]{1,3}).([0-9]{1,3}).([0-9]{1,3}))");
-                    const regex r("(\\d{1,3}(\\.\\d{1,3}){3})");
-                    smatch sm;
-                    if (regex_search(spf, sm, r))
-                    {
-                        cout << "input string has " << sm.size() << " matches " << endl;
-                        for (int i=1; i<sm.size(); i++)
-                        {
-                            cout << "REGES " << sm[0] << endl;
-                            ips.push_back(sm[0]);
-                        }
-                    }
-                }
-
-                // get the current time
-                time_t rawtime;
-                tm * ptm;
-                time ( &rawtime );
-                ptm = gmtime ( &rawtime );
-
-                // log this information to ipaddr.log
-                ofstream ipaddr_log("ipaddr.log", ios::app);
-                ipaddr_log << (ptm->tm_hour+MST%24) << ":" << (ptm->tm_min) << " " << domain << " " << ns_rr_rdata(rr) << " " << endl;
-                ipaddr_log.close();
-
-              }
-        #endif
-    }
+	                    // const regex r("(\\b(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b)");
+	                    // const regex r("(([0-9]{1,3}).([0-9]{1,3}).([0-9]{1,3}).([0-9]{1,3}))");
+	                    const regex r("(\\d{1,3}(\\.\\d{1,3}){3})");
+	                    smatch sm;
+	                    if (regex_search(spf, sm, r))
+	                    {
+	                        cout << "input string has " << sm.size() << " matches " << endl;
+	                        for (int i=1; i<sm.size(); i++)
+	                        {
+	                            cout << "REGES " << sm[0] << endl;
+	                            ips.push_back(sm[0]);
+	                        }
+	                    }
+	                }
+	              }
+	        #endif
+	    }
+	}catch(...){
+		return ips;
+	}
     // ---------
     return ips;
 }
 
-void DnsSPF::DnsMX(std::string domain)
+// return TXT dns records list (v=spf1 i v=spf2)
+vector<string> DnsSPF::getDnsSPF(std::string domain)
 {
+    // TXT list
+    vector<string> ips;
+    try{
+	    res_init();
+	    u_char nsbuf[N];
+	    char dispbuf[N];
+	    ns_msg msg;
+	    ns_rr rr;
+	    int i, l;
 
-    res_init();
-
-    u_char nsbuf[N];
-        char dispbuf[N];
-        ns_msg msg;
-        ns_rr rr;
-        int i, l;
-
-        // HEADER
-        // printf("Domain : %s\n", std::string(domain));
-	cout << "Domain " << std::string(domain) << endl;
-
-        // MX RECORD
-        // printf("MX records : \n");
-	cout << " Mx records " << endl;
-
-        l = res_query(domain.c_str(), ns_c_any, ns_t_mx, nsbuf, sizeof(nsbuf));
-        if (l < 0)
-        {
-          perror(domain.c_str());
-        } else {
-            #ifdef USE_PQUERY
-                  /* this will give lots of detailed info on the request and reply */
-                  res_pquery(&_res, nsbuf, l, stdout);
-            #else
-                  /* just grab the MX answer info */
-                  ns_initparse(nsbuf, l, &msg);
-                  l = ns_msg_count(msg, ns_s_an);
-                  for (i = 0; i < l; i++)
-                  {
-                    ns_parserr(&msg, ns_s_an, i, &rr);
-                    // int prr = ns_parserr(&msg, ns_s_an, j, &rr);
-
-                    //BLOCK 1
-                    char *cp;
-                    cp = (char *) ns_rr_name(rr);
-                    printf("CP->%s\n", (char *) cp);
-                    int i1 = ns_rr_type(rr);
-                    printf("Type->%d\n", i1);
-                    int i2 = ns_rr_class(rr);
-                    printf("Class->%d\n", i2);
-                    int i3 = ns_rr_ttl(rr);
-                    printf("TTL->%d\n", i3);
-                    int i4 = ns_rr_rdlen(rr);
-                    printf("DataLength->%d\n", i4);
-
-                    // priority
-                    char exchange[NS_MAXDNAME];
-                    const u_char *rdata = ns_rr_rdata(rr);
-                    const uint16_t pri = ns_get16(rdata);
-                    int len = dn_expand(nsbuf, nsbuf + 250, rdata + 2, exchange, sizeof(exchange));
-                    // priority
-                    printf("Pri->%d\n", pri);
-                    // hostname
-                    printf("Exchange->%s\n", exchange);
-
-                    ns_sprintrr(&msg, &rr, NULL, NULL, dispbuf, sizeof(dispbuf));
-                    printf ("\t%s\n", dispbuf);
-                    cout << "IP Address " << hostname_to_ip(exchange) << endl;
-
-                    // TXT
-                    cout << "TXT " <<  ns_rr_rdata(rr) << endl;
-                    //cout << ns_rr_ttl(rr) << endl;
-                    //cout << ntohs(*(unsigned short*)ns_rr_rdata(rr)) << endl;
-                    //cout << ntohs(*((unsigned short*)ns_rr_rdata(rr) + 1)) << endl;
-                    //cout << ntohs(*((unsigned short*)ns_rr_rdata(rr) + 2)) << endl;
-
-                    /*
-                    // get the current time
-                    time_t rawtime;
-                    tm * ptm;
-                    time ( &rawtime );
-                    ptm = gmtime ( &rawtime );
-
-                    // log this information to ipaddr.log
-                    ofstream ipaddr_log("ipaddr.log", ios::app);
-                    ipaddr_log << (ptm->tm_hour+MST%24) << ":" << (ptm->tm_min) << " " << domain << " " << exchange << " (" << hostname_to_ip(exchange) << ")" << endl;
-                    ipaddr_log.close();
-                    */
-
-                  }
-            #endif
-        }
-        // ---------
+	    // TXT RECORD	    
+	    // l = res_query(domain.c_str(), ns_c_any, ns_t_txt, nsbuf, sizeof(nsbuf));
+	    l = res_query(domain.c_str(), C_IN, ns_t_txt, nsbuf, sizeof(nsbuf));
+	    if (l < 0)
+	    {
+	    	perror(domain.c_str());
+	    } else {
+	        #ifdef USE_PQUERY
+	              /* this will give lots of detailed info on the request and reply */
+	              res_pquery(&_res, nsbuf, l, stdout);
+	        #else
+	              /* just grab the TXT answer info */
+	              ns_initparse(nsbuf, l, &msg);
+	              l = ns_msg_count(msg, ns_s_an);
+	              for (i = 0; i < l; i++)
+	              {
+	                ns_parserr(&msg, ns_s_an, i, &rr);
+	                std::string spf = std::string((char*)ns_rr_rdata(rr));
+	                 // cout << "TXT " << spf << endl;
+	                if(spf.find(std::string("v=spf1")) != std::string::npos || spf.find(std::string("v=spf2")) != std::string::npos){
+	                    ips.push_back(spf);
+	                }
+	              }
+	        #endif
+	    }
+	}catch(...){
+		return ips;
+	}
+    // return TXT records containing =spf
+    return ips;
 }
 
 // return email mx hosts list from dns
-vector<string> DnsSPF::DnsMX2(std::string email)
-{
-    string domain = "localhost";
-    vector<string> em = splitDelimiter(email,"@");
-    if(em.size() > 1){
-        domain = em.at(em.size()-1);
-    }
+vector<string> DnsSPF::getDnsMX(std::string email) {
+	// hosts list
+	vector<string> mxhosts;
 
-    vector<string> mxhosts;
+	try{
+	    string domain = "localhost";
+	    vector<string> em = splitDelimiter(email,"@");
+	    if(em.size() > 1){
+	        domain = em.at(em.size()-1);
+	    }    
 
-    res_init();
-    u_char nsbuf[N];
-        char dispbuf[N];
-        ns_msg msg;
-        ns_rr rr;
-        int i, l;
+	    res_init();
+	    u_char nsbuf[N];
+	    char dispbuf[N];
+	    ns_msg msg;
+	    ns_rr rr;
+	    int i, l;
 
-        // HEADER
-        // printf("Domain : %s\n", std::string(domain));
+	    l = res_query(domain.c_str(), ns_c_any, ns_t_mx, nsbuf, sizeof(nsbuf));
+	    if (l < 0)
+	    {
+	      perror(domain.c_str());
+	      return mxhosts;
+	    } else {
+	        #ifdef USE_PQUERY
+	              /* this will give lots of detailed info on the request and reply */
+	              res_pquery(&_res, nsbuf, l, stdout);
+	        #else
+	              /* just grab the MX answer info */
+	              ns_initparse(nsbuf, l, &msg);
+	              l = ns_msg_count(msg, ns_s_an);
+	              for (i = 0; i < l; i++)
+	              {
+	                ns_parserr(&msg, ns_s_an, i, &rr);
+	                // int prr = ns_parserr(&msg, ns_s_an, j, &rr);
+	                // priority
+	                char exchange[NS_MAXDNAME];
+	                const u_char *rdata = ns_rr_rdata(rr);
+	                const uint16_t pri = ns_get16(rdata);
+	                int len = dn_expand(nsbuf, nsbuf + 250, rdata + 2, exchange, sizeof(exchange));
+	                // priority
+	                // printf("Pri->%d\n", pri);
+	                // hostname
+	                // printf("Exchange->%s\n", exchange);
+	                mxhosts.push_back(exchange);
+	              }
+	        #endif
+	    }
+    }catch(...){
+		return mxhosts;
+	}
+    // ---------
+    return mxhosts;
+}
 
-        // MX RECORD
-        // printf("MX records : \n");
-        l = res_query(domain.c_str(), ns_c_any, ns_t_mx, nsbuf, sizeof(nsbuf));
-        if (l < 0)
-        {
-          perror(domain.c_str());
-        } else {
-            #ifdef USE_PQUERY
-                  /* this will give lots of detailed info on the request and reply */
-                  res_pquery(&_res, nsbuf, l, stdout);
-            #else
-                  /* just grab the MX answer info */
-                  ns_initparse(nsbuf, l, &msg);
-                  l = ns_msg_count(msg, ns_s_an);
-                  for (i = 0; i < l; i++)
-                  {
-                    ns_parserr(&msg, ns_s_an, i, &rr);
-                    // int prr = ns_parserr(&msg, ns_s_an, j, &rr);
+// validate ip address in spf records
+bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
+	try{
+		// remve empty char
+		domain = RemoveSpaces(domain);
+		// explode spf
+		vector<string> parts = splitDelimiter(spf," ");
+		// erase first part v=spf1
+		parts.erase(parts.begin());
 
-                    // priority
-                    char exchange[NS_MAXDNAME];
-                    const u_char *rdata = ns_rr_rdata(rr);
-                    const uint16_t pri = ns_get16(rdata);
-                    int len = dn_expand(nsbuf, nsbuf + 250, rdata + 2, exchange, sizeof(exchange));
-                    // priority
-                    // printf("Pri->%d\n", pri);
-                    // hostname
-                    // printf("Exchange->%s\n", exchange);
-                    mxhosts.push_back(exchange);
+		// don't check when spf contain
+		if(inVector(parts,"+all") || inVector(parts,"~all")){
+			return 1;
+		}
 
-                    /*
-                    // get the current time
-                    time_t rawtime;
-                    tm * ptm;
-                    time ( &rawtime );
-                    ptm = gmtime ( &rawtime );
+		for (unsigned int i=0;i<parts.size();i++)
+		{		
+			// get part
+			string record = parts.at(i);
+			// replace empty char
+			record = RemoveSpaces(record);			
 
-                    // log this information to ipaddr.log
-                    ofstream ipaddr_log("ipaddr.log", ios::app);
-                    ipaddr_log << (ptm->tm_hour+MST%24) << ":" << (ptm->tm_min) << " " << domain << " " << exchange << " (" << hostname_to_ip(exchange) << ")" << endl;
-                    ipaddr_log.close();
-                    */
-                  }
-            #endif
-        }
-        // ---------
-        return mxhosts;
+			if(record.length() > 0){				
+				// ipv4:
+				if(Contain(record,"ip4:")){
+					string ip = RemoveSpaces(replaceAll(record,"ip4:"," "));
+					if(ip == ipAddress){
+						return 1;
+					}			
+				}
+				// ipv6:
+				if(Contain(record,"ip6:")){
+					string ip = RemoveSpaces(replaceAll(record,"ip6:"," "));
+					if(ip == ipAddress){
+						return 1;
+					}			
+				}
+				// a				
+				if(Contain(record,"a") && record.length() == 1){
+					string ip = hostname_to_ip(domain);
+					if(ip == ipAddress){
+						return 1;
+					}			
+				}
+				// mx records for domain
+				if(Contain(record,"mx") && record.length() == 2){					
+					vector<string> mxhosts = DnsMX(domain);
+					for (int i = 0; i < mxhosts.size(); i++)
+					{
+						string ip = hostname_to_ip(host);	
+						if(ip == ipAddress){
+							return 1;
+						}			
+					}			
+				}
+				// a:
+				if(Contain(record,"a:")){
+					string host = RemoveSpaces(replaceAll(record,"a:"," "));
+					string ip = hostname_to_ip(host);
+					if(ip == ipAddress){
+						return 1;
+					}			
+				}
+				// include:
+				if(Contain(record,"include:")){
+					string host = RemoveSpaces(replaceAll(record,"include:"," "));
+					string ip = hostname_to_ip(host);
+					if(ip == ipAddress){
+						return 1;
+					}			
+				}
+				// ptr - wszystkie servery z hostem z revers dns mogą wysyłać			
+				if(Contain(record,"ptr") && record.length() == 3){
+					// revers host
+					string ptr = ip_to_hostname(ipAddress);
+					// domena pasuje do revers
+					if(domain == ptr){
+						return 1;
+					}			
+				}
+				// ptr - wszystkie servery z hostem z revers dns mogą wysyłać			
+				if(Contain(record,"ptr:")){
+					string host = RemoveSpaces(replaceAll(record,"ptr:"," "));					
+					// revers host
+					string ptr = ip_to_hostname(ipAddress);					
+					// size
+					if(ptr.length() > host.length()){
+						int len = host.length();
+						ptr = substr(ptr.length()-len);
+						// revers host zawiera
+						if(ptr == host){
+							return 1;
+						}
+					}
+					if(ptr == host){
+						return 1;
+					}
+				}
+				// -all
+				if(Contain(record,"-all")){
+					return 0;
+				}
+			}
+		}
+	}catch(...){
+		return 0;
+	}
+	return 0;
+}
+
+// if vector contain string return 1 else 0
+bool DnsSPF::inVector(std::vector<string> v, string search){
+	for(int i = 0; i < v.size(); i++){
+		// remove empty char
+	    if(v.at(i) == search){
+	    	return 1;
+	    }
+	}
+	return 0;
 }
 
 // Get ip from domain name
@@ -374,157 +424,15 @@ void DnsSPF::RemoveSpaces(char* source)
 }
 
 
-bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
-	try{
-		// remve empty char
-		domain = RemoveSpaces(domain);
-		// explode spf
-		vector<string> parts = splitDelimiter(spf," ");
-		// erase first part v=spf1
-		parts.erase(parts.begin());
+/*
+// get the current time
+time_t rawtime;
+tm * ptm;
+time ( &rawtime );
+ptm = gmtime ( &rawtime );
 
-		for (unsigned int i=0;i<parts.size();i++)
-		{		
-			// get part
-			string record = parts.at(i);
-			// replace empty char
-			record = RemoveSpaces(record);			
-
-			if(record.length() > 0){				
-				// ipv4:
-				if(Contain(record,"ip4:")){
-					string ip = RemoveSpaces(replaceAll(record,"ip4:"," "));
-					if(ip == ipAddress){
-						return 1;
-					}			
-				}
-				// ipv6:
-				if(Contain(record,"ip6:")){
-					string ip = RemoveSpaces(replaceAll(record,"ip6:"," "));
-					if(ip == ipAddress){
-						return 1;
-					}			
-				}
-				// a				
-				if(Contain(record,"a") && record.length() == 1){
-					string ip = hostname_to_ip(domain);
-					if(ip == ipAddress){
-						return 1;
-					}			
-				}
-				// mx records for domain
-				if(Contain(record,"mx") && record.length() == 2){
-					string email = "m@";
-					email.append(domain);
-					vector<string> mxhosts = DnsMX2(email);
-					for (int i = 0; i < mxhosts.size(); i++)
-					{
-						string ip = hostname_to_ip(host);	
-						if(ip == ipAddress){
-							return 1;
-						}			
-					}			
-				}
-				// a:
-				if(Contain(record,"a:")){
-					string host = RemoveSpaces(replaceAll(record,"a:"," "));
-					string ip = hostname_to_ip(host);
-					if(ip == ipAddress){
-						return 1;
-					}			
-				}
-				// include:
-				if(Contain(record,"include:")){
-					string host = RemoveSpaces(replaceAll(record,"include:"," "));
-					string ip = hostname_to_ip(host);
-					if(ip == ipAddress){
-						return 1;
-					}			
-				}
-				// ptr - wszystkie servery z hostem z revers dns mogą wysyłać			
-				if(Contain(record,"ptr") && record.length() == 3){
-					// revers host
-					string ptr = ip_to_hostname(ipAddress);
-					// domena pasuje do revers
-					if(domain == ptr){
-						return 1;
-					}			
-				}
-				// ptr - wszystkie servery z hostem z revers dns mogą wysyłać			
-				if(Contain(record,"ptr:")){
-					string host = RemoveSpaces(replaceAll(record,"ptr:"," "));					
-					// revers host
-					string ptr = ip_to_hostname(ipAddress);					
-					// size
-					if(ptr.length() > host.length()){
-						int len = host.length();
-						ptr = substr(ptr.length()-len);
-						// revers host zawiera
-						if(ptr == host){
-							return 1;
-						}
-					}
-					if(ptr == host){
-						return 1;
-					}
-				}
-				// +all, ~all - allow all records
-				if(Contain(record,"+all") || Contain(record,"~all")){
-					return 1;
-				}
-				// -all
-				if(Contain(record,"-all")){
-					return 0;
-				}
-			}
-		}
-	}catch(...){
-		return 0;
-	}
-	return 0;
-}
-
-// return TXT dns records list (v=spf1 i v=spf2)
-vector<string> DnsSPF::getDnsTXTSPF(std::string domain)
-{
-    // TXT list
-    vector<string> ips;
-    try{
-	    res_init();
-	    u_char nsbuf[N];
-	    char dispbuf[N];
-	    ns_msg msg;
-	    ns_rr rr;
-	    int i, l;
-
-	    // TXT RECORD	    
-	    // l = res_query(domain.c_str(), ns_c_any, ns_t_txt, nsbuf, sizeof(nsbuf));
-	    l = res_query(domain.c_str(), C_IN, ns_t_txt, nsbuf, sizeof(nsbuf));
-	    if (l < 0)
-	    {
-	    	perror(domain.c_str());
-	    } else {
-	        #ifdef USE_PQUERY
-	              /* this will give lots of detailed info on the request and reply */
-	              res_pquery(&_res, nsbuf, l, stdout);
-	        #else
-	              /* just grab the TXT answer info */
-	              ns_initparse(nsbuf, l, &msg);
-	              l = ns_msg_count(msg, ns_s_an);
-	              for (i = 0; i < l; i++)
-	              {
-	                ns_parserr(&msg, ns_s_an, i, &rr);
-	                std::string spf = std::string((char*)ns_rr_rdata(rr));
-	                 // cout << "TXT " << spf << endl;
-	                if(spf.find(std::string("v=spf1")) != std::string::npos || spf.find(std::string("v=spf2")) != std::string::npos){
-	                    ips.push_back(spf);
-	                }
-	              }
-	        #endif
-	    }
-	}catch(...){
-		return ips;
-	}
-    // return TXT records containing =spf
-    return ips;
-}
+// log this information to ipaddr.log
+ofstream ipaddr_log("ipaddr.log", ios::app);
+ipaddr_log << (ptm->tm_hour+MST%24) << ":" << (ptm->tm_min) << " " << domain << " " << exchange << " (" << hostname_to_ip(exchange) << ")" << endl;
+ipaddr_log.close();
+*/
