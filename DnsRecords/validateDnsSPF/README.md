@@ -23,3 +23,15 @@ for (unsigned int i = 0; i < spflist.size(); ++i)<br>
   cout << spflist.at(i) << endl;<br>
   cout << "DNS IP is: " << dns.validSpfIP("173.194.0.123", "gmail.com", spflist.at(i)) << endl;<br>
 }<br>
+
+spflist = dns.getDnsSPF("_spf.google.com");<br>
+for (unsigned int i = 0; i < spflist.size(); ++i)<br>
+{<br>
+  cout << spflist.at(i) << endl;<br>
+}<br>
+<br>
+spflist = dns.getDnsSPF("_netblocks.google.com");<br>
+for (unsigned int i = 0; i < spflist.size(); ++i)<br>
+{<br>
+  cout << spflist.at(i) << endl;<br>
+}<br>
