@@ -1,18 +1,4 @@
 #include "dnsspf.h"
-#include <iostream>
-#include <regex>
-// ip address
-#include <sstream>
-// network
-#include <arpa/inet.h>
-// str sockadr
-#include <netdb.h>
-
-// find, find vectors
-#include <algorithm>
-
-// perror
-#include <errno.h>
 
 #define N 4096
 #define MST (-2)
@@ -32,7 +18,7 @@ bool DnsSPF::DnsSPFvalidIP(string host, string ip){
     return false;
 }
 
-// return list ip addresses from TXT dns txt records only: > SMTPspf:1.2.3.4
+// return list ip addresses from TXT dns txt records only: > SMTPspf:1.2.3.4 or ip4:1.1.1.1
 vector<string> DnsSPF::getDnsTXT(std::string domain)
 {
 	// ip list 
@@ -41,7 +27,7 @@ vector<string> DnsSPF::getDnsTXT(std::string domain)
 	try{
 	    res_init();	    
 	    u_char nsbuf[N];
-	    char dispbuf[N];
+	    //char dispbuf[N];
 	    ns_msg msg;
 	    ns_rr rr;
 	    int i, l;
@@ -74,7 +60,7 @@ vector<string> DnsSPF::getDnsTXT(std::string domain)
 	                    if (regex_search(spf, sm, r))
 	                    {
 	                        cout << "input string has " << sm.size() << " matches " << endl;
-	                        for (int i=1; i<sm.size(); i++)
+	                        for (unsigned int i=1; i<sm.size(); i++)
 	                        {
 	                            cout << "REGES " << sm[0] << endl;
 	                            ips.push_back(sm[0]);
@@ -91,15 +77,15 @@ vector<string> DnsSPF::getDnsTXT(std::string domain)
     return ips;
 }
 
-// return TXT dns records list (v=spf1 i v=spf2)
+// return TXT dns records list with v=spf1 i v=spf2
 vector<string> DnsSPF::getDnsSPF(std::string domain)
 {
-    // TXT list
-    vector<string> ips;
+    // TXT SPF list
+    vector<string> spflist;
     try{
 	    res_init();
 	    u_char nsbuf[N];
-	    char dispbuf[N];
+	    //char dispbuf[N];
 	    ns_msg msg;
 	    ns_rr rr;
 	    int i, l;
@@ -124,16 +110,16 @@ vector<string> DnsSPF::getDnsSPF(std::string domain)
 	                std::string spf = std::string((char*)ns_rr_rdata(rr));
 	                 // cout << "TXT " << spf << endl;
 	                if(spf.find(std::string("v=spf1")) != std::string::npos || spf.find(std::string("v=spf2")) != std::string::npos){
-	                    ips.push_back(spf);
+	                    spflist.push_back(spf);
 	                }
 	              }
 	        #endif
 	    }
 	}catch(...){
-		return ips;
+		return spflist;
 	}
     // return TXT records containing =spf
-    return ips;
+    return spflist;
 }
 
 // return email mx hosts list from dns
@@ -150,7 +136,7 @@ vector<string> DnsSPF::getDnsMX(std::string email) {
 
 	    res_init();
 	    u_char nsbuf[N];
-	    char dispbuf[N];
+	    //char dispbuf[N];
 	    ns_msg msg;
 	    ns_rr rr;
 	    int i, l;
@@ -175,8 +161,9 @@ vector<string> DnsSPF::getDnsMX(std::string email) {
 	                // priority
 	                char exchange[NS_MAXDNAME];
 	                const u_char *rdata = ns_rr_rdata(rr);
-	                const uint16_t pri = ns_get16(rdata);
-	                int len = dn_expand(nsbuf, nsbuf + 250, rdata + 2, exchange, sizeof(exchange));
+	                // const uint16_t pri = ns_get16(rdata);
+	                // int len = dn_expand(nsbuf, nsbuf + 250, rdata + 2, exchange, sizeof(exchange));
+	                dn_expand(nsbuf, nsbuf + 250, rdata + 2, exchange, sizeof(exchange));
 	                // priority
 	                // printf("Pri->%d\n", pri);
 	                // hostname
@@ -202,11 +189,13 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
 		// erase first part v=spf1
 		parts.erase(parts.begin());
 
-		// don't check when spf contain
-		if(inVector(parts,"+all") || inVector(parts,"~all")){
+		// don't check when spf contain +all or ~all allow all
+		// if(inVector(parts,"+all") || inVector(parts,"~all")){
+		if(inVector(parts,"+all")){
 			return 1;
 		}
 
+		// validate records
 		for (unsigned int i=0;i<parts.size();i++)
 		{		
 			// get part
@@ -214,13 +203,31 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
 			// replace empty char
 			record = RemoveSpaces(record);			
 
-			if(record.length() > 0){				
+			if(record.length() > 0){		
+				// redirect
+				if(Contain(record,"redirect=")){
+					string hoop = RemoveSpaces(replaceAll(record,"redirect="," "));
+					vector<string> rlist = getDnsSPF(hoop);
+					for (unsigned int i = 0; i < rlist.size(); i++)
+					{
+						string rec = rlist.at(i);
+						int val = validSpfIP(ipAddress,domain,rec);
+						if (val)
+						{
+							return 1;
+						}
+					}										
+				}		
 				// ipv4:
 				if(Contain(record,"ip4:")){
 					string ip = RemoveSpaces(replaceAll(record,"ip4:"," "));
-					if(ip == ipAddress){
+					if(Contain(record,"/")){
+						// return validateRangeIP("173.194.0.0/16","173.194.0.123");
+						int ok = validateRangeIP(ip,ipAddress);
+						if(ok)return 1;
+					}else if(ip == ipAddress){
 						return 1;
-					}			
+					}
 				}
 				// ipv6:
 				if(Contain(record,"ip6:")){
@@ -238,9 +245,10 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
 				}
 				// mx records for domain
 				if(Contain(record,"mx") && record.length() == 2){					
-					vector<string> mxhosts = DnsMX(domain);
-					for (int i = 0; i < mxhosts.size(); i++)
+					vector<string> mxhosts = getDnsMX(domain);
+					for (unsigned int i = 0; i < mxhosts.size(); i++)
 					{
+						string host = mxhosts.at(i);
 						string ip = hostname_to_ip(host);	
 						if(ip == ipAddress){
 							return 1;
@@ -257,11 +265,23 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
 				}
 				// include:
 				if(Contain(record,"include:")){
-					string host = RemoveSpaces(replaceAll(record,"include:"," "));
-					string ip = hostname_to_ip(host);
-					if(ip == ipAddress){
-						return 1;
-					}			
+					// validate from dns txt spf not ip
+					string hoop = RemoveSpaces(replaceAll(record,"include:"," "));
+					vector<string> rlist = getDnsSPF(hoop);					
+					for (unsigned int i = 0; i < rlist.size(); i++)
+					{
+						string rec = rlist.at(i);
+						int val = validSpfIP(ipAddress,domain,rec);
+						if (val)
+						{
+							return 1;
+						}
+					}
+					//string host = RemoveSpaces(replaceAll(record,"include:"," "));
+					//string ip = hostname_to_ip(host);
+					//if(ip == ipAddress){
+					//	return 1;
+					//}			
 				}
 				// ptr - wszystkie servery z hostem z revers dns mogą wysyłać			
 				if(Contain(record,"ptr") && record.length() == 3){
@@ -280,7 +300,7 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
 					// size
 					if(ptr.length() > host.length()){
 						int len = host.length();
-						ptr = substr(ptr.length()-len);
+						ptr = ptr.substr(ptr.length()-len);
 						// revers host zawiera
 						if(ptr == host){
 							return 1;
@@ -289,22 +309,19 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
 					if(ptr == host){
 						return 1;
 					}
-				}
-				// -all
-				if(Contain(record,"-all")){
-					return 0;
-				}
-			}
-		}
+				}				
+			}						
+		}		
 	}catch(...){
 		return 0;
 	}
+	// default -all don't allow from ip
 	return 0;
 }
 
 // if vector contain string return 1 else 0
 bool DnsSPF::inVector(std::vector<string> v, string search){
-	for(int i = 0; i < v.size(); i++){
+	for(unsigned int i = 0; i < v.size(); i++){
 		// remove empty char
 	    if(v.at(i) == search){
 	    	return 1;
@@ -410,10 +427,11 @@ char* DnsSPF::replace_char(char* str, char find, char replace){
     return str;
 }
 
-void DnsSPF::RemoveSpaces(char* source)
+string DnsSPF::RemoveSpaces(string str)
 {
-  char* i = source;
-  char* j = source;
+	/*
+  char* i = (char *)source.c_str();
+  char* j = (char *)source.c_str();
   while(*j != 0)
   {
     *i = *j++;
@@ -421,6 +439,46 @@ void DnsSPF::RemoveSpaces(char* source)
       i++;
   }
   *i = 0;
+  */
+	std::string::iterator end_pos = std::remove(str.begin(), str.end(), ' ');
+	str.erase(end_pos, str.end());
+  	return str;
+}
+
+vector<string> DnsSPF::split(string s, char delim) {
+	vector<string> v;
+    auto i = 0;
+    auto pos = s.find(delim);
+    while (pos != string::npos) {
+      v.push_back(s.substr(i, pos-i));
+      i = ++pos;
+      pos = s.find(delim, pos);
+      if (pos == string::npos)
+         v.push_back(s.substr(i, s.length()));
+    }
+    return v;
+}
+
+// validate if ip is in range "64.18.0.0/16"
+bool DnsSPF::validateRangeIP(string ipsubnet,string ip){
+	char * CIDR = (char *)ipsubnet.c_str();
+	if(Contain(ipsubnet,"/")){
+		uint32_t my_ip = inet_addr(ip.c_str());                  // Convert your IP string to uint32 "64.18.44.55"
+		vector<string> vr = split(CIDR,'/');	
+		if(vr.size() > 0){
+			uint32_t range = inet_addr( vr.at(0).c_str() );// Convert IP part of CIDR to uint32
+			int num_bits = atoi( vr.at(1).c_str() );       // Convert bits part of CIDR to int
+			int mask = (1 << num_bits) - 1;                // Calc mask
+			if ((my_ip & mask) == (range & mask)){
+			    // cout << "OK IP RANGE" << endl;
+			    return 1;
+			}else{
+				// cout << "ERROR MASK OK " << endl;
+				return 0;
+			}
+		}	
+	}
+	return 0;
 }
 
 
