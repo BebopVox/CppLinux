@@ -1,24 +1,30 @@
 #ifndef DNSSPF_H
 #define DNSSPF_H
 
+#include <iostream>
 #include <string>
+#include <string.h> //memset
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <netinet/in.h>
-#include <resolv.h>
-#include <netdb.h>
-#include<string.h> //memset
-#include<stdlib.h> //for exit(0);
-// #include<sys/socket.h>
-#include<errno.h> //For errno - the error number
-#include<netdb.h> //hostent
-#include<arpa/inet.h>
-
-#include <iostream>
+#include <stdlib.h> //for exit(0);
+#include <errno.h> 
 #include <fstream>
 #include <time.h>
 #include <vector>
+#include <regex>
+// ip address
+#include <sstream>
+// network
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <resolv.h>
+// str sockadr, hostnet
+#include <netdb.h>
+// find, find vectors
+#include <algorithm>
+// perror
+#include <errno.h>
 
 using namespace std;
 
@@ -26,9 +32,9 @@ class DnsSPF
 {
 public:
     bool DnsSPFvalidIP(string host, string ip);
-    void DnsMX(std::string domain);
-    vector<string> DnsMX2(std::string email);
-    vector<string> DnsTXT(std::string domain);
+    vector<string> getDnsMX(std::string email);
+    vector<string> getDnsTXT(std::string domain);
+    vector<string> getDnsSPF(std::string domain);
     std::string hostname_to_ip(std::string hostname);
     std::string ip_to_hostname(std::string ip);
     bool is_ipv4_address(const string& str);
@@ -37,10 +43,14 @@ public:
     // str
     bool Contain(std::string str, std::string search);    
     char* replace_char(char* str, char find, char replace);
-    void RemoveSpaces(char* source);
+    string RemoveSpaces(string source);
     bool validSpfIP(string ip, string domain, string spf);
-    string replaceAll(string s,string search,string replace);
-    vector<string> getDnsTXTSPF(std::string domain);
+    string replaceAll(string s,string search,string replace);    
+    // search string in vector
+    bool inVector(std::vector<string> v, string search);
+    // validate ip range
+    bool validateRangeIP(string ipsubnet,string ip);
+    vector<string> split(string s, char delim);
 };
 
 #endif // DNSSPF_H
