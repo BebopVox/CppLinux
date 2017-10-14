@@ -1,4 +1,3 @@
-// validate spf txt record
 #include "dnsspf.h"
 #include <iostream>
 #include <regex>
@@ -372,6 +371,8 @@ void DnsSPF::RemoveSpaces(char* source)
 
 bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
 	try{
+		// remve empty char
+		domain = RemoveSpaces(domain);
 		// explode spf
 		vector<string> parts = splitDelimiter(spf," ");
 		// erase first part v=spf1
@@ -390,8 +391,15 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
 					return 1;
 				}
 				// ipv4:
-				if(Contain(record,"ipv4:")){
-					string ip = RemoveSpaces(replaceAll(record,"ipv4:"," "));
+				if(Contain(record,"ip4:")){
+					string ip = RemoveSpaces(replaceAll(record,"ip4:"," "));
+					if(ip == ipAddress){
+						return 1;
+					}			
+				}
+				// ipv6:
+				if(Contain(record,"ip4:")){
+					string ip = RemoveSpaces(replaceAll(record,"ip6:"," "));
 					if(ip == ipAddress){
 						return 1;
 					}			
