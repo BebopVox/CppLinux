@@ -456,3 +456,48 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
 	}
 	return 0;
 }
+
+// return TXT dns records list (v=spf1 i v=spf2)
+vector<string> DnsSPF::getDnsTXTSPF(std::string domain)
+{
+    // TXT list
+    vector<string> ips;
+    try{
+	    res_init();
+	    u_char nsbuf[N];
+	    char dispbuf[N];
+	    ns_msg msg;
+	    ns_rr rr;
+	    int i, l;
+
+	    // TXT RECORD	    
+	    // l = res_query(domain.c_str(), ns_c_any, ns_t_txt, nsbuf, sizeof(nsbuf));
+	    l = res_query(domain.c_str(), C_IN, ns_t_txt, nsbuf, sizeof(nsbuf));
+	    if (l < 0)
+	    {
+	    	perror(domain.c_str());
+	    } else {
+	        #ifdef USE_PQUERY
+	              /* this will give lots of detailed info on the request and reply */
+	              res_pquery(&_res, nsbuf, l, stdout);
+	        #else
+	              /* just grab the TXT answer info */
+	              ns_initparse(nsbuf, l, &msg);
+	              l = ns_msg_count(msg, ns_s_an);
+	              for (i = 0; i < l; i++)
+	              {
+	                ns_parserr(&msg, ns_s_an, i, &rr);
+	                std::string spf = std::string((char*)ns_rr_rdata(rr));
+	                 // cout << "TXT " << spf << endl;
+	                if(spf.find(std::string("v=spf1")) != std::string::npos || spf.find(std::string("v=spf2")) != std::string::npos){
+	                    ips.push_back(spf);
+	                }
+	              }
+	        #endif
+	    }
+	}catch(...){
+		return ips;
+	}
+    // return TXT records containing =spf
+    return ips;
+}
