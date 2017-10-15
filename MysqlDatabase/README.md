@@ -3,6 +3,15 @@
 #### Install mysql library
 apt-get install libmysql++ <br>
 apt-get install libmysql++-dev <br>
+#### or/and
+apt-get install libmysql++3 libmysqld-dev libmysqlclient-dev
+#### openssl 
+apt-get install openssl libssl-dev
+#### curl
+apt-get install curl libcurl3
+#### boost
+apt-get install libboost-dev libboost-all-dev libboost-regex-dev
+
 
 #### Compile:
 g++ -o start main.cpp -Wall -Wextra -pedantic -std=c++11 -pthread -lmysqlclient -L/usr/include/mysql -I/usr/include/mysql -L. -I.
