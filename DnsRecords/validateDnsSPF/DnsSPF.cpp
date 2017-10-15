@@ -180,7 +180,7 @@ vector<string> DnsSPF::getDnsMX(std::string email) {
 }
 
 // validate ip address in spf records
-bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
+bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf, vector<string> redirects){
 	try{
 		// remve empty char
 		domain = RemoveSpaces(domain);
@@ -206,17 +206,23 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf){
 			if(record.length() > 0){		
 				// redirect
 				if(Contain(record,"redirect=")){
+
 					string hoop = RemoveSpaces(replaceAll(record,"redirect="," "));
-					vector<string> rlist = getDnsSPF(hoop);
-					for (unsigned int i = 0; i < rlist.size(); i++)
-					{
-						string rec = rlist.at(i);
-						int val = validSpfIP(ipAddress,domain,rec);
-						if (val)
+					if(std::find(redirects.begin(), redirects.end(), hoop) != redirects.end()) {
+						// ok contain don't do anything
+					}else{
+						redirects.push_back(hoop);
+						vector<string> rlist = getDnsSPF(hoop);
+						for (unsigned int i = 0; i < rlist.size(); i++)
 						{
-							return 1;
-						}
-					}										
+							string rec = rlist.at(i);
+							int val = validSpfIP(ipAddress,domain,rec,redirects);
+							if (val)
+							{
+								return 1;
+							}
+						}	
+					}									
 				}		
 				// ipv4:
 				if(Contain(record,"ip4:")){
