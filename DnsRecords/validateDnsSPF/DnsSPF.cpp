@@ -206,7 +206,7 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf, vector<stri
 			if(record.length() > 0){		
 				// redirect
 				if(Contain(record,"redirect=")){
-
+					// redirect record
 					string hoop = RemoveSpaces(replaceAll(record,"redirect="," "));
 					if(std::find(redirects.begin(), redirects.end(), hoop) != redirects.end()) {
 						// ok contain don't do anything
@@ -271,18 +271,23 @@ bool DnsSPF::validSpfIP(string ipAddress, string domain, string spf, vector<stri
 				}
 				// include:
 				if(Contain(record,"include:")){
-					// validate from dns txt spf not ip
+					// include spf from domain
 					string hoop = RemoveSpaces(replaceAll(record,"include:"," "));
-					vector<string> rlist = getDnsSPF(hoop);					
-					for (unsigned int i = 0; i < rlist.size(); i++)
-					{
-						string rec = rlist.at(i);
-						int val = validSpfIP(ipAddress,domain,rec);
-						if (val)
+					if(std::find(redirects.begin(), redirects.end(), hoop) != redirects.end()) {
+						// ok contain don't do anything
+					}else{
+						redirects.push_back(hoop);
+						vector<string> rlist = getDnsSPF(hoop);
+						for (unsigned int i = 0; i < rlist.size(); i++)
 						{
-							return 1;
-						}
-					}
+							string rec = rlist.at(i);
+							int val = validSpfIP(ipAddress,domain,rec,redirects);
+							if (val)
+							{
+								return 1;
+							}
+						}	
+					}	
 					//string host = RemoveSpaces(replaceAll(record,"include:"," "));
 					//string ip = hostname_to_ip(host);
 					//if(ip == ipAddress){
