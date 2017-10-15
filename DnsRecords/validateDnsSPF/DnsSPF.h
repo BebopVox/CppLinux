@@ -51,6 +51,7 @@ public:
     // validate ip range
     bool validateRangeIP(string ipsubnet,string ip);
     vector<string> split(string s, char delim);
+    bool IsPrivateAddress(uint32_t ip);    
 };
 
 #endif // DNSSPF_H
