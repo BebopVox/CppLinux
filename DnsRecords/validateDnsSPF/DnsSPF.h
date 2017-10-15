@@ -44,7 +44,7 @@ public:
     bool Contain(std::string str, std::string search);    
     char* replace_char(char* str, char find, char replace);
     string RemoveSpaces(string source);
-    bool validSpfIP(string ip, string domain, string spf);
+    bool validSpfIP(string ipAddress, string domain, string spf, vector<string> redirects)
     string replaceAll(string s,string search,string replace);    
     // search string in vector
     bool inVector(std::vector<string> v, string search);
