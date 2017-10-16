@@ -8,52 +8,57 @@
 #include <syslog.h>
 #include <string.h>
 
-int main(void) {
-        
-        /* Our process ID and Session ID */
-        pid_t pid, sid;
-        
-        /* Fork off the parent process */
-        pid = fork();
-        if (pid < 0) {
-                exit(EXIT_FAILURE);
-        }
-        /* If we got a good PID, then
-           we can exit the parent process. */
-        if (pid > 0) {
-                exit(EXIT_SUCCESS);
-        }
+using namespace std;
 
-        /* Change the file mode mask */
-        umask(0);
-                
-        /* Open any logs here */        
-                
-        /* Create a new SID for the child process */
-        sid = setsid();
-        if (sid < 0) {
-                /* Log the failure */
-                exit(EXIT_FAILURE);
-        }
+#define DAEMON_NAME "vdaemon"
 
-        /* Change the current working directory */
-        if ((chdir("/")) < 0) {
-                /* Log the failure */
-                exit(EXIT_FAILURE);
-        }
-        
-        /* Close out the standard file descriptors */
-        close(STDIN_FILENO);
-        close(STDOUT_FILENO);
-        close(STDERR_FILENO);
-        
-        /* Daemon-specific initialization goes here */
-        
-        /* The Big Loop */
-        while (1) {
-           /* Do some task here ... */
-           
-           sleep(30); /* wait 30 seconds */
-        }
-   exit(EXIT_SUCCESS);
+void process(){
+
+    syslog (LOG_NOTICE, "Writing to my Syslog");
+}   
+
+int main(int argc, char *argv[]) {
+
+    //Set our Logging Mask and open the Log
+    setlogmask(LOG_UPTO(LOG_NOTICE));
+    openlog(DAEMON_NAME, LOG_CONS | LOG_NDELAY | LOG_PERROR | LOG_PID, LOG_USER);
+
+    syslog(LOG_INFO, "Entering Daemon");
+
+    pid_t pid, sid;
+
+   //Fork the Parent Process
+    pid = fork();
+
+    if (pid < 0) { exit(EXIT_FAILURE); }
+
+    //We got a good pid, Close the Parent Process
+    if (pid > 0) { exit(EXIT_SUCCESS); }
+
+    //Change File Mask
+    umask(0);
+
+    //Create a new Signature Id for our child
+    sid = setsid();
+    if (sid < 0) { exit(EXIT_FAILURE); }
+
+    //Change Directory
+    //If we cant find the directory we exit with failure.
+    if ((chdir("/")) < 0) { exit(EXIT_FAILURE); }
+
+    //Close Standard File Descriptors
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+
+    //----------------
+    //Main Process
+    //----------------
+    while(true){
+        process();    //Run our Process
+        sleep(60);    //Sleep for 60 seconds
+    }
+
+    //Close the log
+    closelog ();
 }
