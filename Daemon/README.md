@@ -26,3 +26,5 @@ kill -15 {JOB-PID} <br>
 killall -9 CppAppName <br>
 killall -15 CppAppName <br>
 
+#### References
+http://shahmirj.com/blog/beginners-guide-to-creating-a-daemon-in-linux
