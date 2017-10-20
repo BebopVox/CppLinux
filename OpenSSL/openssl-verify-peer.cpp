@@ -1,3 +1,15 @@
+int callback1(X509_STORE_CTX *ctx, void *arg){
+    if(ctx!=NULL){}
+    if(arg!=NULL){}
+    return 1;
+}
+
+int callback(int x, X509_STORE_CTX *ctx){
+    if(ctx!=NULL){}
+    if(x!=1){}
+    return 1;
+}
+
 // Disable certs verification
 SSL_set_verify(ssl, SSL_VERIFY_NONE, 0);
 SSL_set_verify_depth(ssl,0);
