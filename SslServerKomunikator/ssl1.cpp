@@ -244,6 +244,11 @@ void ServerLoop(SSL *ssl, string ipAddress){
 
     while(1){
     	// do send/read loop here
+        
+        // Command loop class
+        Loop l;
+        // get command if needed
+        string cmd = l.getCMD(std::string(buffer));
 
     	// clear buffer 
         memset(buffer, 0, sizeof buffer);
@@ -254,15 +259,10 @@ void ServerLoop(SSL *ssl, string ipAddress){
 
         // get error
         end = sslError(ssl, received);
-        if(end > 0){ break;}
+        if(end > 0){ cout << l.logi.str() << endl; break;}
 
         // Count total bytes
         TotalReceived += received;
-
-        // Command loop
-        Loop l;
-        // get command
-        string cmd = l.getCMD(std::string(buffer));
         
         // When user authenticated
         if(auth == 1){
@@ -276,18 +276,37 @@ void ServerLoop(SSL *ssl, string ipAddress){
                 received = SSL_write(ssl, reply, strlen(reply));
                 // get error
                 end = sslError(ssl, received);
-                if(end > 0){ break;}
-            }else if(ok == 3){
-                // Error socket
+                if(end > 0){ cout << l.logi.str() << endl; break;}
+            }else if(ok == 2){
+                // Message
+                char reply[] = "100|Message has been sent\r\n";
+                // Send message
+                received = SSL_write(ssl, reply, strlen(reply));
+                // show logs
+                cout << l.logi.str() << endl;
+                // end connection
+                SSL_shutdown(ssl);
                 break;
-            }else{
+            }else if(ok == 3){
+                cout << l.logi.str() << endl;
+                // end connection
+                SSL_shutdown(ssl);
+                // Socket error or info command
+                break;
+            }else if(ok == 4){
+                //cout << l.logi.str() << endl;
+                // end connection
+                //SSL_shutdown(ssl);
+                // Socket error or info command
+                // break;
+            }else if(ok == 0){
                 // Message
                 char reply[] = "500|Command error\r\n";
                 // Send message
                 received = SSL_write(ssl, reply, strlen(reply));
                 // get error
                 end = sslError(ssl, received);
-                if(end > 0){ break;}
+                if(end > 0){ cout << l.logi.str() << endl; break;}
             }
 
         }
@@ -303,8 +322,8 @@ void ServerLoop(SSL *ssl, string ipAddress){
                 // Send message
                 received = SSL_write(ssl, reply, strlen(reply));
                 // get error
-                end = sslError(ssl, received);
-                if(end > 0){ break;}
+                end = sslError(ssl, received);                
+                if(end > 0){ cout << l.logi.str() << endl; break;}
             }else{
                 // Message
                 char reply[] = "555|Authentication error\r\n";
@@ -312,7 +331,7 @@ void ServerLoop(SSL *ssl, string ipAddress){
                 received = SSL_write(ssl, reply, strlen(reply));
                 // get error
                 end = sslError(ssl, received);
-                if(end > 0){ break;}
+                if(end > 0){ cout << l.logi.str() << endl; break;}
             }
         }
 
@@ -323,7 +342,7 @@ void ServerLoop(SSL *ssl, string ipAddress){
         // get error
         //end = sslError(ssl, received);
         //if(end > 0){ break;}
-    }
+    }    
 }
 
 // Date time like smtp date

@@ -6,11 +6,22 @@
 
 using namespace std;
 
-//string Loop::from = "";
-//string Loop::subject = "";
+// string Loop::from = "";
+// string Loop::subject = "";
 
-Loop::Loop(){}
+Loop::Loop(){
+    logi << "###[" << time(0) << "]###" << endl;
+}
 // Loop::~loop(){}
+
+string Loop::currentDateTimeSMTP(){
+    // current date/time based on current system
+   time_t now = time(0);   
+   // convert now to string form
+   char* dt = ctime(&now);   
+   dt[strlen(dt)-1] = '\0';
+   return std::string(dt);
+}
 
 string Loop::getAccountInfo(long long id){
     return "Account info|userID:1234567890|Username:Zenek";
@@ -21,7 +32,7 @@ string Loop::getAds(long long id){
 }
 
 bool Loop::validEmail(string email){
-    cout << "[VALIDATE_EMAIL] " << email << endl;
+    logi << "[VALIDATE_EMAIL] " << email << endl;
     return 1;
 }
 
@@ -69,28 +80,28 @@ bool Loop::sslError(SSL *ssl, int received){
     // const int st = ERR_get_error();
     if (err == SSL_ERROR_NONE) {
         // OK send
-        // std::cout << "[SSL_OK] " << err << endl;
+        // std::logi << "[SSL_OK] " << err << endl;
     } else if (err == SSL_ERROR_WANT_READ ) {
         SSL_shutdown(ssl);
         return 1;
         //kill(getpid(), SIGKILL);
     } else if (err == SSL_ERROR_SYSCALL) {
-        cout << "SYSCALL"<<endl;
+        logi << "SYSCALL"<<endl;
         SSL_shutdown(ssl);
         return 1;
         //kill(getpid(), SIGKILL);
     } else if (err == SSL_ERROR_ZERO_RETURN) {
-        cout << "SYSCALL"<<endl;
+        logi << "SYSCALL"<<endl;
         SSL_shutdown(ssl);
         return 1;
         //kill(getpid(), SIGKILL);
     } else if (err == SSL_ERROR_SSL) {
-        cout << "SYSCALL"<<endl;
+        logi << "SYSCALL"<<endl;
         SSL_shutdown(ssl);
         return 1;
         //kill(getpid(), SIGKILL);
     } else {
-        cout << "SYSCALL"<<endl;
+        logi << "SYSCALL"<<endl;
         SSL_shutdown(ssl);
         return 1;
         //kill(getpid(), SIGKILL);
@@ -124,14 +135,15 @@ bool Loop::Authenticate(string email, string pass){
     // check in db if user exists
     if (email == "user" && pass == "pass"){     
         // User id in db
-        long long userID = 123;   
+        userID = 123;   
+        cout << "[USER_ID] " << userID << endl;
         return 1;
     }
     return 0;
 }
 
 bool Loop::Auth(string buff, SSL *ssl, string ipAddress){
-
+    this->cmdCnt += 1;
     if(Contain(buff,"|") && strlen((const char*)buff.c_str()) > 3){
         buff = replaceAll(buff,"\\r\\n","");    
         vector<string> cmd = split(buff,'|');        
@@ -147,26 +159,26 @@ bool Loop::Auth(string buff, SSL *ssl, string ipAddress){
         }
 
         // CMD      
-        cout << "[AUTH_CMD] " << c << endl;  
-        cout << "[AUTH_CMD] " << buff << " size: " << cmd.size() <<  endl;
+        logi << "[AUTH_CMD] " << c << endl;  
+        logi << "[AUTH_CMD] " << buff << " size: " << cmd.size() <<  endl;
 
         if (c == "auth"){
-            cout << "[AUTH_CMD]" << endl;
-            cout << "[AUTH_EMAIL] " << mail << endl;
-            cout << "[AUTH_PASS] " << pass << endl;
-            cout << "[AUTH] " << Authenticate(mail,pass) << endl;
+            logi << "[AUTH_CMD]" << endl;
+            logi << "[AUTH_EMAIL] " << mail << endl;
+            // logi << "[AUTH_PASS] " << pass << endl;
+            logi << "[AUTH] " << Authenticate(mail,pass) << endl;
             // validate user credentials
             return Authenticate(mail,pass);
         }
        
     }else{
-        cout << "[ERROR_CMD] " << buff << " IP " << ipAddress << endl;        
+        logi << "[ERROR_CMD] " << buff << " IP " << ipAddress << endl;        
     }    
     return 0;
 }
 
 int Loop::getCmdAll(string buff, SSL *ssl){
-    cmdCnt += 1;
+    this->cmdCnt += 1;
     if(Contain(buff,"|") && strlen((const char*)buff.c_str()) > 3 && cmdCnt <= cmdLimit){   
         buff = replaceAll(buff,"\\r\\n","");     
         vector<string> cmd = split(buff,'|');        
@@ -185,22 +197,22 @@ int Loop::getCmdAll(string buff, SSL *ssl){
         }
         
         // CMD      
-        cout << "[CMD] " << c << endl;  
-        cout << "[CMD] " << buff << " size: " << cmd.size() <<  endl;
+        logi << "[CMD] " << c << endl;  
+        logi << "[CMD] " << buff << " size: " << cmd.size() <<  endl;
 
         if (c == "from"){
-            cout << "[FROM_CMD]" << endl;
-            cout << "[FROM_EMAIL] " << n1 << endl;
-            cout << "[FROM_NAME] " << n2 << endl;
+            logi << "[FROM_CMD]" << endl;
+            logi << "[FROM_EMAIL] " << n1 << endl;
+            logi << "[FROM_NAME] " << n2 << endl;
             if(validEmail(n1)){
                 from = buff;                
                 return 1;
             }
         }
         if (c == "to"){
-            cout << "[TO_CMD]" << endl;
-            cout << "[TO_EMAIL] " << n1 << endl;
-            cout << "[TO_NAME] " << n2 << endl;
+            logi << "[TO_CMD]" << endl;
+            logi << "[TO_EMAIL] " << n1 << endl;
+            logi << "[TO_NAME] " << n2 << endl;
             // validate user email
             if(validEmail(n1)){
                 to.push_back(buff);
@@ -208,21 +220,21 @@ int Loop::getCmdAll(string buff, SSL *ssl){
             }
         }
         if (c == "bcc"){
-            cout << "[BCC_CMD]" << endl;
-            cout << "[BCC_EMAIL] " << n1 << endl;
-            cout << "[BCC_NAME] " << n2 << endl;
+            logi << "[BCC_CMD]" << endl;
+            logi << "[BCC_EMAIL] " << n1 << endl;
+            logi << "[BCC_NAME] " << n2 << endl;
             bcc.push_back(buff);
             return 1;
         }
         if (c == "subject"){
-            cout << "[SUB_CMD]" << endl;
-            cout << "[SUB_TEXT] " << n1 << endl;            
+            logi << "[SUB_CMD]" << endl;
+            logi << "[SUB_TEXT] " << n1 << endl;            
             subject = n1;
             return 1;
         }
         if (c == "data"){
-            cout << "[DATA_CMD]" << endl;
-            cout << "[DATA_TEXT] " << n1 << endl;
+            logi << "[DATA_CMD]" << endl;
+            logi << "[DATA_TEXT] " << n1 << endl;
 
             // Message
             char reply[] = "100|Send html/txt message\r\n";
@@ -246,23 +258,23 @@ int Loop::getCmdAll(string buff, SSL *ssl){
                 TotalReceived += received;
 
                 // get error                
-                if(sslError(ssl, received) > 0){ 
+                if(sslError(ssl, received) > 0){                     
                     return 3;
                 }
 
                 data.push_back(buffer);
 
                 if(Contain(buffer, "[END].[END]") || Contain(buffer, "\\r\\n.\\r\\n")){
-                    cout << "[DATA_SIZE] " << TotalReceived << endl;                    
+                    logi << "[DATA_SIZE] " << TotalReceived << endl;                                   
                     return 1;
                 }
             }            
             return 0;
         }    
-        if (c == "file"){
-            cout << "[FILE_CMD]" << endl;
-            cout << "[FILE_NAME] " << n1 << endl;
-            cout << "[FILE_ID] " << n2 << endl;            
+        if (c == "file" && disableFiles == 0){
+            logi << "[FILE_CMD]" << endl;
+            logi << "[FILE_NAME] " << n1 << endl;
+            logi << "[FILE_ID] " << n2 << endl;            
 
             n1 = replaceAll(cmd.at(1)," ", "");
             n2 = replaceAll(cmd.at(2)," ", "");
@@ -296,7 +308,7 @@ int Loop::getCmdAll(string buff, SSL *ssl){
                 TotalReceived += received;
 
                 // get error                
-                if(sslError(ssl, received) > 0){ 
+                if(sslError(ssl, received) > 0){                     
                     return 3;
                 }
                 // Single file
@@ -305,16 +317,49 @@ int Loop::getCmdAll(string buff, SSL *ssl){
                 if(Contain(buffer, "[END].[END]") || Contain(buffer, "\r\n.\r\n")){
                     // Add to all files
                     files.push_back(file);
-                    cout << "[FILE_SIZE] " << TotalReceived << endl;
+                    logi << "[FILE_SIZE] " << TotalReceived << endl;
                     return 1;
                 }
             }            
             return 0;
         }          
         if (c == "send"){
-            cout << "[SEND_CMD]" << endl;            
+            logi << "[SEND_CMD]" << endl;            
             return 2;
-        }    
+        }
+        // INFO CHANEL
+        if (c == "account"){
+            logi << "[ACCOUNT_CMD] " << userID << endl;            
+            // User account info
+            string account = getAccountInfo(userID);       
+            // Message
+            ostringstream m;
+            m << "100|UserID:" << userID << "\r\n";
+            char *r2 = (char *)(m.str()).c_str();
+            // Send message
+            int received = SSL_write(ssl, r2, strlen(r2));
+            return 4;
+        }
+        if (c == "ads"){
+            logi << "[ADS_CMD]" << endl;  
+            logi << "[ADS_ID] " << n1 << endl;          
+            // Ads id
+            long long adsID = atoll(n1.c_str());            
+            // User account info
+            string ads_html_b64 = getAds(adsID);
+            // Message
+            ostringstream m;
+            m << "100|" << ads_html_b64 << "\r\n";
+            char *r3 = (char *)(m.str()).c_str();
+            // Send message
+            int received = SSL_write(ssl, r3, strlen(r3));
+            // get error                
+            if(sslError(ssl, received) > 0){                 
+                return 3;
+            }            
+            return 4;
+        }
         return 0;
     }
+    return 0;
 }

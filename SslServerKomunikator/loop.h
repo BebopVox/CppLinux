@@ -1,16 +1,23 @@
 #ifndef LOOP2_H
 #define LOOP2_H
 
+
 #include <cstring> // strlen
 #include <string>
 #include <vector>
-#include <iostream>
+
+#include <iostream> // cin, cout
+#include <sstream>  // std::ostringstream
+
 #include <openssl/ssl.h>
 
 using namespace std;
 
 class Loop{
 public:
+	// logs
+	ostringstream logi;
+	
 	Loop();
 	// ~Loop();
 	// Loop functions
@@ -23,6 +30,7 @@ public:
 	bool validEmail(string email);
 	bool banIP(string IP);
 	bool sslError(SSL *ssl, int received);
+	string currentDateTimeSMTP();
 
 	// Send to client
 	bool sendMsg(string msg, SSL *ssl);
@@ -34,13 +42,20 @@ public:
 	int getCmdAll(string buff, SSL *ssl);
 
 private:
+	// Authenticated user id
+	long long userID = 0;
+	// Commands limit
 	int cmdLimit = 100;
-	int cmdCnt = 0;
+	// Current commands
+	int cmdCnt = 0;	
+	// Message
 	string from = "";
 	string subject = "";
 	vector<string> to;
 	vector<string> bcc;
 	vector<string> data;
 	vector<vector<string>> files;
+	// Disable files
+	int disableFiles = 0;	
 };
 #endif // LOOP2_H
