@@ -17,15 +17,23 @@ class Loop{
 public:
 	// logs
 	ostringstream logi;
-	
+	// Authenticated user id
+	long long userID = 0;
+	// Divider hash
+	string hash = "-----[ABCKGB123321BGKCBA]-----";
+
 	Loop();
 	// ~Loop();
+	// Generate new hash
+	string newHash();
+	unsigned long getMicrotime();
 	// Loop functions
 	string getCMD(string buff);
 	string replaceAll(string s, string search, string replace);
 	bool Contain(std::string str, std::string search);
 	vector<string> split(string s, char delim);
-	string getAccountInfo(long long id);
+	string getAccountInfo();
+	string getOnlineUsers();
 	string getAds(long long id);
 	bool validEmail(string email);
 	bool banIP(string IP);
@@ -41,9 +49,7 @@ public:
 	// Get command all
 	int getCmdAll(string buff, SSL *ssl);
 
-private:
-	// Authenticated user id
-	long long userID = 0;
+private:	
 	// Commands limit
 	int cmdLimit = 100;
 	// Current commands

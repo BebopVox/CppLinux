@@ -242,13 +242,13 @@ void ServerLoop(SSL *ssl, string ipAddress){
     // Authenticated
     int auth = 0;
 
+    // Command loop class
+    Loop l;
+    // get command if needed
+    string cmd = l.getCMD(std::string(buffer));
+
     while(1){
     	// do send/read loop here
-        
-        // Command loop class
-        Loop l;
-        // get command if needed
-        string cmd = l.getCMD(std::string(buffer));
 
     	// clear buffer 
         memset(buffer, 0, sizeof buffer);

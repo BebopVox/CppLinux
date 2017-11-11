@@ -11,8 +11,18 @@ using namespace std;
 
 Loop::Loop(){
     logi << "###[" << time(0) << "]###" << endl;
+    // random hash divider
+    newHash();
 }
 // Loop::~loop(){}
+
+unsigned long Loop::getMicrotime(){  
+    struct timeval tp;
+    gettimeofday(&tp, NULL);
+    long int ms = tp.tv_sec * 1000 + tp.tv_usec / 1000; 
+    // cout << ms << " microseconds " << endl;
+    return ms;
+}
 
 string Loop::currentDateTimeSMTP(){
     // current date/time based on current system
@@ -23,7 +33,27 @@ string Loop::currentDateTimeSMTP(){
    return std::string(dt);
 }
 
-string Loop::getAccountInfo(long long id){
+string Loop::getOnlineUsers(){
+    vector<string> users;
+    users.push_back("123"); 
+    users.push_back("555"); 
+    users.push_back("654"); 
+    ostringstream list;
+    for (int i = 0; i < users.size(); i++){
+        list << users.at(i) << "|";
+    }
+    return list.str();
+}
+
+string Loop::newHash(){    
+    ostringstream h;
+    h << "-----[XXX" << getMicrotime() << "ZZZ]-----";
+    this->hash = h.str();
+    return this->hash;
+}
+
+string Loop::getAccountInfo(){
+    cout << "[ACCOUNT_ID] " << this->userID << endl;
     return "Account info|userID:1234567890|Username:Zenek";
 }
 
@@ -166,9 +196,10 @@ bool Loop::Auth(string buff, SSL *ssl, string ipAddress){
             logi << "[AUTH_CMD]" << endl;
             logi << "[AUTH_EMAIL] " << mail << endl;
             // logi << "[AUTH_PASS] " << pass << endl;
-            logi << "[AUTH] " << Authenticate(mail,pass) << endl;
+            int isauth = Authenticate(mail,pass);
+            logi << "[AUTH] " << isauth << endl;
             // validate user credentials
-            return Authenticate(mail,pass);
+            return isauth;
         }
        
     }else{
@@ -248,6 +279,9 @@ int Loop::getCmdAll(string buff, SSL *ssl){
             const int readSize = 8192;
             char buffer[readSize];
 
+            // Add hash divider
+            data.push_back(hash);
+
             while(1){
                 // clear buffer 
                 memset(buffer, 0, sizeof buffer);
@@ -295,8 +329,12 @@ int Loop::getCmdAll(string buff, SSL *ssl){
             const int readSize = 8192;
             char buffer[readSize];
 
-            // file 
+            // hash divider
             vector<string> file;
+            file.push_back(hash);
+            file.push_back(n1);
+            file.push_back(n2);
+            file.push_back("\r\n");
 
             while(1){
                 // clear buffer 
@@ -328,16 +366,21 @@ int Loop::getCmdAll(string buff, SSL *ssl){
             return 2;
         }
         // INFO CHANEL
-        if (c == "account"){
-            logi << "[ACCOUNT_CMD] " << userID << endl;            
+        if (c == "account"){                       
             // User account info
-            string account = getAccountInfo(userID);       
+            string account = getAccountInfo();       
+            logi << "[ACCOUNT_CMD] " << account << endl; 
             // Message
-            ostringstream m;
-            m << "100|UserID:" << userID << "\r\n";
-            char *r2 = (char *)(m.str()).c_str();
+            ostringstream ms;
+            ms << "100|" << account << "|";
+            string out = ms.str().append("\r\n");
+            char *r2 = (char *)out.c_str();
             // Send message
             int received = SSL_write(ssl, r2, strlen(r2));
+            // get error                
+            if(sslError(ssl, received) > 0){                 
+                return 3;
+            }  
             return 4;
         }
         if (c == "ads"){
@@ -348,9 +391,27 @@ int Loop::getCmdAll(string buff, SSL *ssl){
             // User account info
             string ads_html_b64 = getAds(adsID);
             // Message
-            ostringstream m;
-            m << "100|" << ads_html_b64 << "\r\n";
-            char *r3 = (char *)(m.str()).c_str();
+            ostringstream ms;
+            ms << "100|" << ads_html_b64 << "|";
+            string out = ms.str().append("\r\n");
+            char *r3 = (char *)out.c_str();
+            // Send message
+            int received = SSL_write(ssl, r3, strlen(r3));
+            // get error                
+            if(sslError(ssl, received) > 0){                 
+                return 3;
+            }            
+            return 4;
+        }
+        if (c == "online"){
+            logi << "[ONLINE_CMD]" << endl;
+            // User account info
+            string online = getOnlineUsers();
+            // Message
+            ostringstream ms;
+            ms << "100|" << online << "|";
+            string out = ms.str().append("\r\n");
+            char *r3 = (char *)out.c_str();
             // Send message
             int received = SSL_write(ssl, r3, strlen(r3));
             // get error                
